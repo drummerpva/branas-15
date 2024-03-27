@@ -1,23 +1,25 @@
-export function validateCpf(cpf: string) {
-  if (!cpf) return false
-  cpf = clean(cpf)
+export function validateCpf(rawCpf: string) {
+  if (!rawCpf) return false
+  const cpf = removeNonDigits(rawCpf)
   if (!isValidLength(cpf)) return false
   if (hasAllDigitsEqual(cpf)) return false
-  const dg1 = calculateDigit(cpf, 10)
-  const dg2 = calculateDigit(cpf, 11)
-  return extractDigits(cpf) === `${dg1}${dg2}`
+  const digit1 = calculateDigit(cpf, 10)
+  const digit2 = calculateDigit(cpf, 11)
+  return extractDigits(cpf) === `${digit1}${digit2}`
 }
 
-function clean(cpf: string) {
-  return cpf.replace('.', '').replace('.', '').replace('-', '').replace(' ', '')
+function removeNonDigits(cpf: string) {
+  return cpf.replace(/\D/g, '')
 }
 
 function isValidLength(cpf: string) {
-  return cpf.length === 11
+  const CPF_LENGTH = 11
+  return cpf.length === CPF_LENGTH
 }
 
 function hasAllDigitsEqual(cpf: string) {
-  return cpf.split('').every((c) => c === cpf[0])
+  const [firsCpfDigit] = cpf
+  return cpf.split('').every((digit) => digit === firsCpfDigit)
 }
 
 function calculateDigit(cpf: string, factor: number) {
