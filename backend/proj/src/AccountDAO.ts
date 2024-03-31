@@ -1,6 +1,12 @@
 import mysql from 'mysql2/promise'
 
-export class AccountDAO {
+export interface AccountDAO {
+  save(account: any): Promise<void>
+  getByEmail(email: string): Promise<any>
+  getById(accountId: string): Promise<any>
+}
+
+export class AccountDAODatabase implements AccountDAO {
   constructor() {}
 
   async save(account: any) {
@@ -46,5 +52,24 @@ export class AccountDAO {
     )) as any[]
     connection.pool.end()
     return account
+  }
+}
+
+export class AccountDAOMemory implements AccountDAO {
+  accounts: any[]
+  constructor() {
+    this.accounts = []
+  }
+
+  async save(account: any): Promise<void> {
+    this.accounts.push(account)
+  }
+
+  async getByEmail(email: string): Promise<any> {
+    return this.accounts.find((account) => account.email === email)
+  }
+
+  async getById(accountId: string): Promise<any> {
+    return this.accounts.find((account) => account.accountId === accountId)
   }
 }
