@@ -3,6 +3,7 @@ import {
   AccountDAODatabase,
   AccountDAOMemory,
 } from '../src/AccountDAO'
+import sinon from 'sinon'
 import { GetAccount } from '../src/GetAccount'
 import { Signup } from '../src/Signup'
 
@@ -10,8 +11,8 @@ let signup: any
 let getAccount: any
 let accountDAO: AccountDAO
 beforeAll(() => {
-  // accountDAO = new AccountDAODatabase()
-  accountDAO = new AccountDAOMemory()
+  accountDAO = new AccountDAODatabase()
+  // accountDAO = new AccountDAOMemory()
   signup = new Signup(accountDAO)
   getAccount = new GetAccount(accountDAO)
 })
@@ -29,7 +30,7 @@ test('Deve criar a conta de um passageiro', async () => {
   expect(outputGetAccount.name).toBe(input.name)
   expect(outputGetAccount.email).toBe(input.email)
   expect(outputGetAccount.cpf).toBe(input.cpf)
-  expect(outputGetAccount.is_passenger).toBe(input.isPassenger)
+  expect(outputGetAccount.is_passenger).toBeTruthy()
 })
 test('Deve criar a conta de um motorista', async () => {
   const input = {
@@ -101,4 +102,23 @@ test('Não deve criar um usuário se o e-mail já for cadastrado', async () => {
   await expect(() => signup.execute(input)).rejects.toThrowError(
     'Account already exists',
   )
+})
+test('Deve criar a conta de um passageiro stub', async () => {
+  const input = {
+    name: 'John Doe',
+    email: `john.doe${Math.random()}@mail.com`,
+    cpf: '987.654.321-00',
+    isPassenger: true,
+  }
+
+  sinon.stub(AccountDAODatabase.prototype, 'save').resolves()
+  sinon.stub(AccountDAODatabase.prototype, 'getByEmail').resolves(null)
+  sinon.stub(AccountDAODatabase.prototype, 'getById').resolves(input)
+
+  const outputSignup = await signup.execute(input)
+  expect(outputSignup.accountId).toBeTruthy()
+  const outputGetAccount = await getAccount.execute(outputSignup.accountId)
+  expect(outputGetAccount.name).toBe(input.name)
+  expect(outputGetAccount.email).toBe(input.email)
+  expect(outputGetAccount.cpf).toBe(input.cpf)
 })

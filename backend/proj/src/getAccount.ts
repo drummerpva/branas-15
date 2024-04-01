@@ -5,9 +5,9 @@ export class GetAccount {
 
   async execute(accountId: string) {
     const account = await this.accountDAO.getById(accountId)
-    account.is_passenger = account.isPassenger
-    account.is_driver = account.isDriver
-    account.car_plate = account.carPlate
+    // account.is_passenger = account.isPassenger
+    // account.is_driver = account.isDriver
+    // account.car_plate = account.carPlate
     return account
   }
 }
