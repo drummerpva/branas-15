@@ -6,6 +6,7 @@ import {
 import sinon from 'sinon'
 import { GetAccount } from '../src/GetAccount'
 import { Signup } from '../src/Signup'
+import { MailerGateway } from '../src/MailerGateway'
 
 let signup: any
 let getAccount: any
@@ -121,4 +122,57 @@ test('Deve criar a conta de um passageiro stub', async () => {
   expect(outputGetAccount.name).toBe(input.name)
   expect(outputGetAccount.email).toBe(input.email)
   expect(outputGetAccount.cpf).toBe(input.cpf)
+  sinon.restore()
+})
+test('Deve criar a conta de um passageiro spy', async () => {
+  const input = {
+    name: 'John Doe',
+    email: `john.doe${Math.random()}@mail.com`,
+    cpf: '987.654.321-00',
+    isPassenger: true,
+  }
+
+  const saveSpy = sinon.spy(AccountDAODatabase.prototype, 'save')
+  const mailerSpy = sinon.spy(MailerGateway.prototype, 'send')
+
+  const outputSignup = await signup.execute(input)
+  expect(outputSignup.accountId).toBeTruthy()
+  const outputGetAccount = await getAccount.execute(outputSignup.accountId)
+  expect(outputGetAccount.name).toBe(input.name)
+  expect(outputGetAccount.email).toBe(input.email)
+  expect(outputGetAccount.cpf).toBe(input.cpf)
+  expect(saveSpy.calledOnce).toBeTruthy()
+  expect(saveSpy.calledWith(input)).toBeTruthy()
+  expect(mailerSpy.calledOnce).toBeTruthy()
+  expect(
+    mailerSpy.calledWith(
+      'Welcome',
+      input.email,
+      'Use this link to confirm your account',
+    ),
+  ).toBeTruthy()
+  sinon.restore()
+})
+test('Deve criar a conta de um passageiro mock', async () => {
+  const input = {
+    name: 'John Doe',
+    email: `john.doe${Math.random()}@mail.com`,
+    cpf: '987.654.321-00',
+    isPassenger: true,
+  }
+
+  const mailerMock = sinon
+    .mock(MailerGateway.prototype)
+    .expects('send')
+    .once()
+    .withArgs('Welcome', input.email, 'Use this link to confirm your account')
+
+  const outputSignup = await signup.execute(input)
+  expect(outputSignup.accountId).toBeTruthy()
+  const outputGetAccount = await getAccount.execute(outputSignup.accountId)
+  expect(outputGetAccount.name).toBe(input.name)
+  expect(outputGetAccount.email).toBe(input.email)
+  expect(outputGetAccount.cpf).toBe(input.cpf)
+  mailerMock.verify()
+  sinon.restore()
 })
