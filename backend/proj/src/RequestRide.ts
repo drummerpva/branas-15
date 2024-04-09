@@ -18,11 +18,13 @@ export class RequestRide {
     if (activeRide) {
       throw new Error('Passenger has an active ride')
     }
-    const ride: any = input
     const rideId = crypto.randomUUID()
-    ride.rideId = rideId
-    ride.status = 'requested'
-    await this.rideDAO.save(input)
+    const ride = Object.assign(input, {
+      rideId,
+      status: 'requested',
+      date: new Date(),
+    })
+    await this.rideDAO.save(ride)
     return { rideId }
   }
 }

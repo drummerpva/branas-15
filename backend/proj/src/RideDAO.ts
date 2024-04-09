@@ -25,7 +25,7 @@ export class RideDAODatabase implements RideDAO {
         ride.toLat,
         ride.toLong,
         ride.status,
-        new Date(),
+        ride.date,
       ],
     )
     connection.pool.end()

@@ -1,12 +1,12 @@
 import express from 'express'
 import cors from 'cors'
-import mysql from 'mysql2/promise'
 
 import { AccountDAODatabase } from './AccountDAO'
 import { Signup } from './Signup'
 import { GetAccount } from './GetAccount'
 import { RequestRide } from './RequestRide'
 import { RideDAODatabase } from './RideDAO'
+import { GetRide } from './GetRide'
 const app = express()
 app.use(cors())
 app.use(express.json())
@@ -38,14 +38,9 @@ app.post('/request_ride', async (req, res) => {
 })
 
 app.get('/rides/:rideId', async (req, res) => {
-  const connection = mysql.createPool(
-    'mysql://root:root@localhost:3306/branas-15',
-  )
-  const [[ride]] = (await connection.query(
-    `SELECT * FROM ride WHERE ride_id = ?`,
-    [req.params.rideId],
-  )) as any[]
-  connection.pool.end()
+  const rideDAO = new RideDAODatabase()
+  const getRide = new GetRide(rideDAO)
+  const ride = await getRide.execute(req.params.rideId)
   res.json(ride)
 })
 
