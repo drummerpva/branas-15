@@ -4,7 +4,10 @@ import { AccountDAO } from './AccountDAO'
 import { MailerGateway } from './MailerGateway'
 
 export class Signup {
-  constructor(readonly accountDAO: AccountDAO) {}
+  constructor(
+    readonly accountDAO: AccountDAO,
+    readonly mailerGateway: MailerGateway,
+  ) {}
 
   async execute(input: any) {
     const existingAccount = await this.accountDAO.getByEmail(input.email)
@@ -16,8 +19,7 @@ export class Signup {
       throw new Error('Invalid car plate')
     input.accountId = crypto.randomUUID()
     await this.accountDAO.save(input)
-    const mailerGateway = new MailerGateway()
-    await mailerGateway.send(
+    await this.mailerGateway.send(
       'Welcome',
       input.email,
       'Use this link to confirm your account',

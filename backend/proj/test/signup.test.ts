@@ -1,8 +1,4 @@
-import {
-  AccountDAO,
-  AccountDAODatabase,
-  AccountDAOMemory,
-} from '../src/AccountDAO'
+import { AccountDAO, AccountDAODatabase } from '../src/AccountDAO'
 import sinon from 'sinon'
 import { GetAccount } from '../src/GetAccount'
 import { Signup } from '../src/Signup'
@@ -11,10 +7,14 @@ import { MailerGateway } from '../src/MailerGateway'
 let signup: any
 let getAccount: any
 let accountDAO: AccountDAO
+let mailerGateway: MailerGateway
 beforeAll(() => {
   accountDAO = new AccountDAODatabase()
   // accountDAO = new AccountDAOMemory()
-  signup = new Signup(accountDAO)
+  mailerGateway = {
+    send: async () => {},
+  }
+  signup = new Signup(accountDAO, mailerGateway)
   getAccount = new GetAccount(accountDAO)
 })
 
@@ -133,7 +133,8 @@ test('Deve criar a conta de um passageiro spy', async () => {
   }
 
   const saveSpy = sinon.spy(AccountDAODatabase.prototype, 'save')
-  const mailerSpy = sinon.spy(MailerGateway.prototype, 'send')
+  // const mailerSpy = sinon.spy(MailerGateway.prototype, 'send')
+  const mailerSpy = sinon.spy(mailerGateway, 'send')
 
   const outputSignup = await signup.execute(input)
   expect(outputSignup.accountId).toBeTruthy()
@@ -162,7 +163,8 @@ test('Deve criar a conta de um passageiro mock', async () => {
   }
 
   const mailerMock = sinon
-    .mock(MailerGateway.prototype)
+    // .mock(MailerGateway.prototype)
+    .mock(mailerGateway)
     .expects('send')
     .once()
     .withArgs('Welcome', input.email, 'Use this link to confirm your account')

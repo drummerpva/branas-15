@@ -7,13 +7,15 @@ import { GetAccount } from './GetAccount'
 import { RequestRide } from './RequestRide'
 import { RideDAODatabase } from './RideDAO'
 import { GetRide } from './GetRide'
+import { MailerGatewayConsole } from './MailerGateway'
 const app = express()
 app.use(cors())
 app.use(express.json())
 
 app.post('/signup', async (req, res) => {
   const accountDAO = new AccountDAODatabase()
-  const signup = new Signup(accountDAO)
+  const mailerGateway = new MailerGatewayConsole()
+  const signup = new Signup(accountDAO, mailerGateway)
   const output = await signup.execute(req.body)
   res.json(output)
 })
