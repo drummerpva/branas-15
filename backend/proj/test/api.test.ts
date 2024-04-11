@@ -19,10 +19,9 @@ test('Deve criar a conta de um motorista', async () => {
   expect(outputGetAccount.name).toBe(input.name)
   expect(outputGetAccount.email).toBe(input.email)
   expect(outputGetAccount.cpf).toBe(input.cpf)
-  expect(outputGetAccount.car_plate).toBe(input.carPlate)
-  expect(outputGetAccount.is_driver).toBeTruthy()
+  expect(outputGetAccount.carPlate).toBe(input.carPlate)
+  expect(outputGetAccount.isDriver).toBeTruthy()
 })
-
 test('Deve solicitar uma corrida', async () => {
   const inputSignup = {
     name: 'John Doe',

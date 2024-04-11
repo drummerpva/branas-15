@@ -1,15 +1,16 @@
 import mysql from 'mysql2/promise'
+import { Account } from './Account'
 
 export interface AccountDAO {
-  save(account: any): Promise<void>
-  getByEmail(email: string): Promise<any>
-  getById(accountId: string): Promise<any>
+  save(account: Account): Promise<void>
+  getByEmail(email: string): Promise<Account | undefined>
+  getById(accountId: string): Promise<Account | undefined>
 }
 
 export class AccountDAODatabase implements AccountDAO {
   constructor() {}
 
-  async save(account: any) {
+  async save(account: Account) {
     const connection = mysql.createPool(
       'mysql://root:root@localhost:3306/branas-15',
     )
@@ -39,7 +40,16 @@ export class AccountDAODatabase implements AccountDAO {
       [email],
     )) as any[]
     connection.pool.end()
-    return account
+    if (!account) return
+    return Account.restore(
+      account.account_id,
+      account.name,
+      account.email,
+      account.cpf,
+      account.is_passenger,
+      account.is_driver,
+      account.car_plate,
+    )
   }
 
   async getById(accountId: string) {
@@ -51,7 +61,16 @@ export class AccountDAODatabase implements AccountDAO {
       [accountId],
     )) as any[]
     connection.pool.end()
-    return account
+    if (!account) return
+    return Account.restore(
+      account.account_id,
+      account.name,
+      account.email,
+      account.cpf,
+      account.is_passenger,
+      account.is_driver,
+      account.car_plate,
+    )
   }
 }
 

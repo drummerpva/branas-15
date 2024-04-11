@@ -9,7 +9,7 @@ export class RequestRide {
 
   async execute(input: Input): Promise<Output> {
     const account = await this.accountDAO.getById(input.passengerId)
-    if (!account.is_passenger) {
+    if (!account?.isPassenger) {
       throw new Error('Account is not from a passenger')
     }
     const activeRide = await this.rideDAO.getActiveRideByPassengerId(
