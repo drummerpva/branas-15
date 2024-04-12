@@ -1,37 +1,37 @@
 import express from 'express'
 import cors from 'cors'
 
-import { AccountDAODatabase } from './AccountDAO'
+import { AccountRepositoryDatabase } from './AccountRepository'
 import { Signup } from './Signup'
 import { GetAccount } from './GetAccount'
 import { RequestRide } from './RequestRide'
-import { RideDAODatabase } from './RideDAO'
 import { GetRide } from './GetRide'
 import { MailerGatewayConsole } from './MailerGateway'
+import { RideRepositoryDatabase } from './RideRepository'
 const app = express()
 app.use(cors())
 app.use(express.json())
 
 app.post('/signup', async (req, res) => {
-  const accountDAO = new AccountDAODatabase()
+  const accountRepository = new AccountRepositoryDatabase()
   const mailerGateway = new MailerGatewayConsole()
-  const signup = new Signup(accountDAO, mailerGateway)
+  const signup = new Signup(accountRepository, mailerGateway)
   const output = await signup.execute(req.body)
   res.json(output)
 })
 
 app.get('/accounts/:accountId', async (req, res) => {
-  const accountDAO = new AccountDAODatabase()
-  const getAccount = new GetAccount(accountDAO)
+  const accountRepository = new AccountRepositoryDatabase()
+  const getAccount = new GetAccount(accountRepository)
   const output = await getAccount.execute(req.params.accountId)
   res.json(output)
 })
 
 app.post('/request_ride', async (req, res) => {
   try {
-    const accountDAO = new AccountDAODatabase()
-    const rideDAO = new RideDAODatabase()
-    const requestRide = new RequestRide(rideDAO, accountDAO)
+    const accountRepository = new AccountRepositoryDatabase()
+    const rideRepository = new RideRepositoryDatabase()
+    const requestRide = new RequestRide(rideRepository, accountRepository)
     const output = await requestRide.execute(req.body)
     res.json(output)
   } catch (error: any) {
@@ -40,8 +40,8 @@ app.post('/request_ride', async (req, res) => {
 })
 
 app.get('/rides/:rideId', async (req, res) => {
-  const rideDAO = new RideDAODatabase()
-  const getRide = new GetRide(rideDAO)
+  const rideRepository = new RideRepositoryDatabase()
+  const getRide = new GetRide(rideRepository)
   const ride = await getRide.execute(req.params.rideId)
   res.json(ride)
 })

@@ -1,13 +1,11 @@
-import { AccountDAO } from './AccountDAO'
+import { AccountRepository } from './AccountRepository'
 
 export class GetAccount {
-  constructor(readonly accountDAO: AccountDAO) {}
+  constructor(readonly accountRepository: AccountRepository) {}
 
   async execute(accountId: string) {
-    const account = await this.accountDAO.getById(accountId)
-    // account.is_passenger = account.isPassenger
-    // account.is_driver = account.isDriver
-    // account.car_plate = account.carPlate
+    const account = await this.accountRepository.getById(accountId)
+    if (!account) throw new Error('Account does not exist')
     return account
   }
 }

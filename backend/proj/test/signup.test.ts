@@ -1,22 +1,24 @@
-import { AccountDAO, AccountDAODatabase } from '../src/AccountDAO'
 import sinon from 'sinon'
 import { GetAccount } from '../src/GetAccount'
 import { Signup } from '../src/Signup'
 import { MailerGateway } from '../src/MailerGateway'
 import { Account } from '../src/Account'
+import {
+  AccountRepository,
+  AccountRepositoryDatabase,
+} from '../src/AccountRepository'
 
 let signup: any
 let getAccount: any
-let accountDAO: AccountDAO
+let accountRepository: AccountRepository
 let mailerGateway: MailerGateway
 beforeAll(() => {
-  accountDAO = new AccountDAODatabase()
-  // accountDAO = new AccountDAOMemory()
+  accountRepository = new AccountRepositoryDatabase()
   mailerGateway = {
     send: async () => {},
   }
-  signup = new Signup(accountDAO, mailerGateway)
-  getAccount = new GetAccount(accountDAO)
+  signup = new Signup(accountRepository, mailerGateway)
+  getAccount = new GetAccount(accountRepository)
 })
 
 test('Deve criar a conta de um passageiro', async () => {
@@ -113,9 +115,13 @@ test('Deve criar a conta de um passageiro stub', async () => {
     isPassenger: true,
   }
 
-  sinon.stub(AccountDAODatabase.prototype, 'save').resolves()
-  sinon.stub(AccountDAODatabase.prototype, 'getByEmail').resolves(undefined)
-  sinon.stub(AccountDAODatabase.prototype, 'getById').resolves(input as Account)
+  sinon.stub(AccountRepositoryDatabase.prototype, 'save').resolves()
+  sinon
+    .stub(AccountRepositoryDatabase.prototype, 'getByEmail')
+    .resolves(undefined)
+  sinon
+    .stub(AccountRepositoryDatabase.prototype, 'getById')
+    .resolves(input as Account)
 
   const outputSignup = await signup.execute(input)
   expect(outputSignup.accountId).toBeTruthy()
@@ -133,7 +139,7 @@ test('Deve criar a conta de um passageiro spy', async () => {
     isPassenger: true,
   }
 
-  const saveSpy = sinon.spy(AccountDAODatabase.prototype, 'save')
+  const saveSpy = sinon.spy(AccountRepositoryDatabase.prototype, 'save')
   // const mailerSpy = sinon.spy(MailerGateway.prototype, 'send')
   const mailerSpy = sinon.spy(mailerGateway, 'send')
 

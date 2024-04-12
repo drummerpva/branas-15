@@ -1,13 +1,13 @@
 import mysql from 'mysql2/promise'
 import { Account } from './Account'
 
-export interface AccountDAO {
+export interface AccountRepository {
   save(account: Account): Promise<void>
   getByEmail(email: string): Promise<Account | undefined>
   getById(accountId: string): Promise<Account | undefined>
 }
 
-export class AccountDAODatabase implements AccountDAO {
+export class AccountRepositoryDatabase implements AccountRepository {
   constructor() {}
 
   async save(account: Account) {
@@ -74,7 +74,7 @@ export class AccountDAODatabase implements AccountDAO {
   }
 }
 
-export class AccountDAOMemory implements AccountDAO {
+export class AccountRepositoryMemory implements AccountRepository {
   accounts: any[]
   constructor() {
     this.accounts = []

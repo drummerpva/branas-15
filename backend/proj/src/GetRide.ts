@@ -1,20 +1,12 @@
-import { RideDAO } from './RideDAO'
+import { RideRepository } from './RideRepository'
 
 export class GetRide {
-  constructor(readonly rideDAO: RideDAO) {}
+  constructor(readonly rideRepository: RideRepository) {}
 
   async execute(rideId: string): Promise<Output> {
-    const ride = await this.rideDAO.get(rideId)
-    return {
-      passengerId: ride.passenger_id,
-      rideId: ride.ride_id,
-      fromLat: Number(ride.from_lat),
-      fromLong: Number(ride.from_long),
-      toLat: Number(ride.to_lat),
-      toLong: Number(ride.to_long),
-      status: ride.status,
-      date: ride.date,
-    }
+    const ride = await this.rideRepository.get(rideId)
+    if (!ride) throw new Error('Ride does not exist')
+    return ride
   }
 }
 
