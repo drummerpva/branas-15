@@ -1,6 +1,6 @@
-import { AccountRepository } from './AccountRepository'
-import { Ride } from './Ride'
-import { RideRepository } from './RideRepository'
+import { AccountRepository } from '../../infra/repository/AccountRepository'
+import { Ride } from '../../domain/Ride'
+import { RideRepository } from '../../infra/repository/RideRepository'
 export class RequestRide {
   constructor(
     readonly rideRepository: RideRepository,

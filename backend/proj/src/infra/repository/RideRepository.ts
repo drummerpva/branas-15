@@ -1,5 +1,5 @@
-import mysql from 'mysql2/promise'
-import { Ride } from './Ride'
+import { Ride } from '../../domain/Ride'
+import { DatabaseConnection } from '../database/DatabaseConnection'
 
 export interface RideRepository {
   save(ride: Ride): Promise<void>
@@ -8,13 +8,10 @@ export interface RideRepository {
 }
 
 export class RideRepositoryDatabase implements RideRepository {
-  constructor() {}
+  constructor(readonly connection: DatabaseConnection) {}
 
   async save(ride: Ride) {
-    const connection = mysql.createPool(
-      'mysql://root:root@localhost:3306/branas-15',
-    )
-    await connection.query(
+    await this.connection.query(
       `INSERT INTO ride
     (ride_id, passenger_id, from_lat, from_long, to_lat, to_long, status, date)
     VALUES (?,?,?,?,?,?,?,?)`,
@@ -29,18 +26,13 @@ export class RideRepositoryDatabase implements RideRepository {
         ride.date,
       ],
     )
-    connection.pool.end()
   }
 
   async get(rideId: string): Promise<Ride | undefined> {
-    const connection = mysql.createPool(
-      'mysql://root:root@localhost:3306/branas-15',
-    )
-    const [[rideData]] = (await connection.query(
+    const [rideData] = await this.connection.query(
       `SELECT * FROM ride WHERE ride_id = ?`,
       [rideId],
-    )) as any[]
-    connection.pool.end()
+    )
     if (!rideData) return
     return Ride.restore(
       rideData.ride_id,
@@ -57,14 +49,10 @@ export class RideRepositoryDatabase implements RideRepository {
   async getActiveRideByPassengerId(
     passengerId: string,
   ): Promise<Ride | undefined> {
-    const connection = mysql.createPool(
-      'mysql://root:root@localhost:3306/branas-15',
-    )
-    const [[activeRideData]] = (await connection.query(
+    const [activeRideData] = await this.connection.query(
       `SELECT * FROM ride WHERE passenger_id = ? AND status IN('requested', 'accepted')`,
       [passengerId],
-    )) as any[]
-    connection.pool.end()
+    )
     if (!activeRideData) return
     return Ride.restore(
       activeRideData.ride_id,

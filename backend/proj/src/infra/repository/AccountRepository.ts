@@ -1,5 +1,5 @@
-import mysql from 'mysql2/promise'
-import { Account } from './Account'
+import { Account } from '../../domain/Account'
+import { DatabaseConnection } from '../database/DatabaseConnection'
 
 export interface AccountRepository {
   save(account: Account): Promise<void>
@@ -8,15 +8,12 @@ export interface AccountRepository {
 }
 
 export class AccountRepositoryDatabase implements AccountRepository {
-  constructor() {}
+  constructor(readonly connection: DatabaseConnection) {}
 
   async save(account: Account) {
-    const connection = mysql.createPool(
-      'mysql://root:root@localhost:3306/branas-15',
-    )
-    await connection.query(
-      `INSERT INTO account 
-          (account_id, name, email, cpf, car_plate, is_passenger, is_driver) 
+    await this.connection.query(
+      `INSERT INTO account
+          (account_id, name, email, cpf, car_plate, is_passenger, is_driver)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         account.accountId,
@@ -28,18 +25,14 @@ export class AccountRepositoryDatabase implements AccountRepository {
         !!account.isDriver,
       ],
     )
-    connection.pool.end()
   }
 
   async getByEmail(email: string) {
-    const connection = mysql.createPool(
-      'mysql://root:root@localhost:3306/branas-15',
-    )
-    const [[account]] = (await connection.query(
+    const [account] = (await this.connection.query(
       `SELECT * FROM account WHERE email = ?`,
       [email],
     )) as any[]
-    connection.pool.end()
+
     if (!account) return
     return Account.restore(
       account.account_id,
@@ -53,14 +46,11 @@ export class AccountRepositoryDatabase implements AccountRepository {
   }
 
   async getById(accountId: string) {
-    const connection = mysql.createPool(
-      'mysql://root:root@localhost:3306/branas-15',
-    )
-    const [[account]] = (await connection.query(
+    const [account] = (await this.connection.query(
       'select * from account where account_id = ?',
       [accountId],
     )) as any[]
-    connection.pool.end()
+
     if (!account) return
     return Account.restore(
       account.account_id,

@@ -1,24 +1,33 @@
 import sinon from 'sinon'
-import { GetAccount } from '../src/GetAccount'
-import { Signup } from '../src/Signup'
-import { MailerGateway } from '../src/MailerGateway'
-import { Account } from '../src/Account'
+import { GetAccount } from '../../src/application/usecase/GetAccount'
+import { Signup } from '../../src/application/usecase/Signup'
+import { MailerGateway } from '../../src/infra/gateway/MailerGateway'
+import { Account } from '../../src/domain/Account'
 import {
   AccountRepository,
   AccountRepositoryDatabase,
-} from '../src/AccountRepository'
+} from '../../src/infra/repository/AccountRepository'
+import {
+  DatabaseConnection,
+  MysqlAdapter,
+} from '../../src/infra/database/DatabaseConnection'
 
 let signup: any
 let getAccount: any
 let accountRepository: AccountRepository
 let mailerGateway: MailerGateway
+let connection: DatabaseConnection
 beforeAll(() => {
-  accountRepository = new AccountRepositoryDatabase()
+  connection = new MysqlAdapter()
+  accountRepository = new AccountRepositoryDatabase(connection)
   mailerGateway = {
     send: async () => {},
   }
   signup = new Signup(accountRepository, mailerGateway)
   getAccount = new GetAccount(accountRepository)
+})
+afterAll(async () => {
+  await connection.close()
 })
 
 test('Deve criar a conta de um passageiro', async () => {

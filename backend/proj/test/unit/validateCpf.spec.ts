@@ -1,4 +1,4 @@
-import { validateCpf } from '../src/validateCpf'
+import { validateCpf } from '../../src/domain/validateCpf'
 
 test.each(['987.654.321-00', '974.563.215-58', '714.287.938-60'])(
   'Deve testar se o cpf %s é válido',
