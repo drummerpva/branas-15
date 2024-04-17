@@ -20,8 +20,9 @@ export class GetRide {
       fromLong: ride.fromLong,
       toLat: ride.toLat,
       toLong: ride.toLong,
-      status: ride.status,
+      status: ride.getStatus(),
       date: ride.date,
+      driverId: ride.getDriverId(),
     }
   }
 }
@@ -29,6 +30,7 @@ export class GetRide {
 type Output = {
   passengerId: string
   passengerName: string
+  driverId?: string
   rideId: string
   fromLat: number
   fromLong: number

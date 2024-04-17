@@ -3,6 +3,7 @@ import { DatabaseConnection } from '../database/DatabaseConnection'
 
 export interface RideRepository {
   save(ride: Ride): Promise<void>
+  update(ride: Ride): Promise<void>
   get(rideId: string): Promise<Ride | undefined>
   getActiveRideByPassengerId(passengerId: string): Promise<Ride | undefined>
 }
@@ -22,9 +23,16 @@ export class RideRepositoryDatabase implements RideRepository {
         ride.fromLong,
         ride.toLat,
         ride.toLong,
-        ride.status,
+        ride.getStatus(),
         ride.date,
       ],
+    )
+  }
+
+  async update(ride: Ride) {
+    await this.connection.query(
+      `UPDATE ride SET status = ?, driver_id = ? WHERE ride_id = ?`,
+      [ride.getStatus(), ride.getDriverId(), ride.rideId],
     )
   }
 
@@ -43,6 +51,7 @@ export class RideRepositoryDatabase implements RideRepository {
       Number(rideData.to_long),
       rideData.status,
       rideData.date,
+      rideData.driver_id,
     )
   }
 
@@ -63,6 +72,7 @@ export class RideRepositoryDatabase implements RideRepository {
       Number(activeRideData.to_long),
       activeRideData.status,
       activeRideData.date,
+      activeRideData.driver_id,
     )
   }
 }

@@ -8,8 +8,9 @@ export class Ride {
     readonly fromLong: number,
     readonly toLat: number,
     readonly toLong: number,
-    readonly status: string,
+    private status: string,
     readonly date: Date,
+    private driverId?: string,
   ) {}
 
   static create(
@@ -43,6 +44,7 @@ export class Ride {
     toLong: number,
     status: string,
     date: Date,
+    driverId?: string,
   ) {
     return new Ride(
       rideId,
@@ -53,6 +55,26 @@ export class Ride {
       toLong,
       status,
       date,
+      driverId,
     )
+  }
+
+  accept(driverId: string) {
+    if (this.status !== 'requested') throw new Error('Invalid status')
+    this.status = 'accepted'
+    this.driverId = driverId
+  }
+
+  start() {
+    if (this.status !== 'accepted') throw new Error('Invalid status')
+    this.status = 'in_progress'
+  }
+
+  getStatus() {
+    return this.status
+  }
+
+  getDriverId() {
+    return this.driverId
   }
 }
