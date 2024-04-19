@@ -1,39 +1,50 @@
 import crypto from 'node:crypto'
-import { validateCpf } from './validateCpf'
+import { Name } from './Name'
+import { Email } from './Email'
+import { Cpf } from './Cpf'
+import { CarPlate } from './CarPlate'
 export class Account {
+  private name: Name
+  private email: Email
+  private cpf: Cpf
+  private carPlate?: CarPlate
   private constructor(
     readonly accountId: string,
-    readonly name: string,
-    readonly email: string,
-    readonly cpf: string,
+    name: string,
+    email: string,
+    cpf: string,
     readonly isPassenger: boolean,
     readonly isDriver: boolean,
-    readonly carPlate?: string,
+    carPlate?: string,
   ) {
     this.accountId = accountId
-    if (!this.isValidName(name)) throw new Error('Invalid name')
-    if (!this.isValidEmail(email)) throw new Error('Invalid email')
-    if (!validateCpf(cpf)) throw new Error('Invalid cpf')
-    if (isDriver && !this.isValidCarPlate(carPlate))
-      throw new Error('Invalid car plate')
-    this.name = name
-    this.email = email
-    this.cpf = cpf
+
+    if (isDriver && carPlate) this.carPlate = new CarPlate(carPlate)
+    this.name = new Name(name)
+    this.email = new Email(email)
+    this.cpf = new Cpf(cpf)
     this.isPassenger = isPassenger
     this.isDriver = isDriver
-    this.carPlate = carPlate
   }
 
-  private isValidName(name: string) {
-    return name.match(/[a-zA-Z] [a-zA-Z]+/)
+  setName(name: string) {
+    this.name = new Name(name)
   }
 
-  private isValidEmail(email: string) {
-    return email.match(/^(.+)@(.+)$/)
+  getName() {
+    return this.name.getValue()
   }
 
-  private isValidCarPlate(carPlate?: string) {
-    return !!carPlate?.match(/[A-Z]{3}[0-9]{4}/)
+  getEmail() {
+    return this.email.getValue()
+  }
+
+  getCpf() {
+    return this.cpf.getValue()
+  }
+
+  getCarPlate() {
+    return this.carPlate?.getValue()
   }
 
   static restore(

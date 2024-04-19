@@ -2,7 +2,6 @@ import sinon from 'sinon'
 import { GetAccount } from '../../src/application/usecase/GetAccount'
 import { Signup } from '../../src/application/usecase/Signup'
 import { MailerGateway } from '../../src/infra/gateway/MailerGateway'
-import { Account } from '../../src/domain/Account'
 import {
   AccountRepository,
   AccountRepositoryDatabase,
@@ -122,6 +121,18 @@ test('Deve criar a conta de um passageiro stub', async () => {
     email: `john.doe${Math.random()}@mail.com`,
     cpf: '987.654.321-00',
     isPassenger: true,
+    getName() {
+      return this.name
+    },
+    getEmail() {
+      return this.email
+    },
+    getCpf() {
+      return this.cpf
+    },
+    getCarPlate() {
+      return null
+    },
   }
 
   sinon.stub(AccountRepositoryDatabase.prototype, 'save').resolves()
@@ -130,7 +141,7 @@ test('Deve criar a conta de um passageiro stub', async () => {
     .resolves(undefined)
   sinon
     .stub(AccountRepositoryDatabase.prototype, 'getById')
-    .resolves(input as Account)
+    .resolves(input as any)
 
   const outputSignup = await signup.execute(input)
   expect(outputSignup.accountId).toBeTruthy()

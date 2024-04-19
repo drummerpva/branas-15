@@ -22,7 +22,7 @@ export class Signup {
     await this.accountRepository.save(account)
     await this.mailerGateway.send(
       'Welcome',
-      account.email,
+      account.getEmail(),
       'Use this link to confirm your account',
     )
     return {

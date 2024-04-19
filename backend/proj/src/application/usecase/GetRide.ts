@@ -14,7 +14,7 @@ export class GetRide {
     if (!passenger) throw new Error('Passenger not found')
     return {
       passengerId: ride.passengerId,
-      passengerName: passenger.name,
+      passengerName: passenger.getName(),
       rideId: ride.rideId,
       fromLat: ride.fromLat,
       fromLong: ride.fromLong,
