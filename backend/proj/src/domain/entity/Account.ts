@@ -1,8 +1,8 @@
 import crypto from 'node:crypto'
-import { Name } from './Name'
-import { Email } from './Email'
-import { Cpf } from './Cpf'
-import { CarPlate } from './CarPlate'
+import { Name } from '../vo/Name'
+import { Email } from '../vo/Email'
+import { Cpf } from '../vo/Cpf'
+import { CarPlate } from '../vo/CarPlate'
 export class Account {
   private name: Name
   private email: Email

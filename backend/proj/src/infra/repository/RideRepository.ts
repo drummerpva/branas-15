@@ -1,4 +1,4 @@
-import { Ride } from '../../domain/Ride'
+import { Ride } from '../../domain/entity/Ride'
 import { DatabaseConnection } from '../database/DatabaseConnection'
 
 export interface RideRepository {
@@ -14,8 +14,8 @@ export class RideRepositoryDatabase implements RideRepository {
   async save(ride: Ride) {
     await this.connection.query(
       `INSERT INTO ride
-    (ride_id, passenger_id, from_lat, from_long, to_lat, to_long, status, date)
-    VALUES (?,?,?,?,?,?,?,?)`,
+    (ride_id, passenger_id, from_lat, from_long, to_lat, to_long, status, date, last_lat, last_long, distance)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
       [
         ride.rideId,
         ride.passengerId,
@@ -25,14 +25,24 @@ export class RideRepositoryDatabase implements RideRepository {
         ride.getToLong(),
         ride.getStatus(),
         ride.date,
+        ride.getLastLat(),
+        ride.getLastLong(),
+        ride.getDistance(),
       ],
     )
   }
 
   async update(ride: Ride) {
     await this.connection.query(
-      `UPDATE ride SET status = ?, driver_id = ? WHERE ride_id = ?`,
-      [ride.getStatus(), ride.getDriverId(), ride.rideId],
+      `UPDATE ride SET status = ?, driver_id = ?, last_lat = ?, last_long = ?, distance = ? WHERE ride_id = ?`,
+      [
+        ride.getStatus(),
+        ride.getDriverId(),
+        ride.getLastLat(),
+        ride.getLastLong(),
+        ride.getDistance(),
+        ride.rideId,
+      ],
     )
   }
 
@@ -51,6 +61,9 @@ export class RideRepositoryDatabase implements RideRepository {
       Number(rideData.to_long),
       rideData.status,
       rideData.date,
+      Number(rideData.last_lat),
+      Number(rideData.last_long),
+      Number(rideData.distance),
       rideData.driver_id,
     )
   }
@@ -72,6 +85,9 @@ export class RideRepositoryDatabase implements RideRepository {
       Number(activeRideData.to_long),
       activeRideData.status,
       activeRideData.date,
+      Number(activeRideData.last_lat),
+      Number(activeRideData.last_long),
+      Number(activeRideData.distance),
       activeRideData.driver_id,
     )
   }

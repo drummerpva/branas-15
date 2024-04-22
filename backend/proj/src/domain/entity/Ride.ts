@@ -1,9 +1,11 @@
 import crypto from 'node:crypto'
-import { Coord } from './Coord'
+import { Coord } from '../vo/Coord'
 
 export class Ride {
   private from: Coord
   private to: Coord
+  private lastPosition: Coord
+
   private constructor(
     readonly rideId: string,
     readonly passengerId: string,
@@ -13,10 +15,14 @@ export class Ride {
     readonly toLong: number,
     private status: string,
     readonly date: Date,
+    lastLat: number,
+    lastLong: number,
+    private distance: number,
     private driverId?: string,
   ) {
     this.from = new Coord(fromLat, fromLong)
     this.to = new Coord(toLat, toLong)
+    this.lastPosition = new Coord(lastLat, lastLong)
   }
 
   static create(
@@ -38,6 +44,9 @@ export class Ride {
       toLong,
       status,
       date,
+      fromLat,
+      fromLong,
+      0,
     )
   }
 
@@ -50,6 +59,9 @@ export class Ride {
     toLong: number,
     status: string,
     date: Date,
+    lastLat: number,
+    lastLong: number,
+    distance: number,
     driverId?: string,
   ) {
     return new Ride(
@@ -61,6 +73,9 @@ export class Ride {
       toLong,
       status,
       date,
+      lastLat,
+      lastLong,
+      distance,
       driverId,
     )
   }
@@ -74,6 +89,29 @@ export class Ride {
   start() {
     if (this.status !== 'accepted') throw new Error('Invalid status')
     this.status = 'in_progress'
+  }
+
+  updatePosition(lat: number, long: number) {
+    if (this.status !== 'in_progress')
+      throw new Error('Could not update position')
+    const newLastPosition = new Coord(lat, long)
+    this.distance += this.calculateDistance(this.lastPosition, newLastPosition)
+    this.lastPosition = newLastPosition
+  }
+
+  private calculateDistance(from: Coord, to: Coord) {
+    const earthRadius = 6371
+    const degreesToRadians = Math.PI / 180
+    const deltaLat = (to.getLat() - from.getLat()) * degreesToRadians
+    const deltaLon = (to.getLong() - from.getLong()) * degreesToRadians
+    const a =
+      Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+      Math.cos(from.getLat() * degreesToRadians) *
+        Math.cos(to.getLat() * degreesToRadians) *
+        Math.sin(deltaLon / 2) *
+        Math.sin(deltaLon / 2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return Math.round(earthRadius * c)
   }
 
   getStatus() {
@@ -98,5 +136,17 @@ export class Ride {
 
   getToLong() {
     return this.to.getLong()
+  }
+
+  getLastLat() {
+    return this.lastPosition.getLat()
+  }
+
+  getLastLong() {
+    return this.lastPosition.getLong()
+  }
+
+  getDistance() {
+    return this.distance
   }
 }

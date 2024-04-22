@@ -1,5 +1,5 @@
 import { AccountRepository } from '../../infra/repository/AccountRepository'
-import { Ride } from '../../domain/Ride'
+import { Ride } from '../../domain/entity/Ride'
 import { RideRepository } from '../../infra/repository/RideRepository'
 export class RequestRide {
   constructor(

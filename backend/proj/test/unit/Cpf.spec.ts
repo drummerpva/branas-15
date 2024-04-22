@@ -1,4 +1,4 @@
-import { Cpf } from '../../src/domain/Cpf'
+import { Cpf } from '../../src/domain/vo/Cpf'
 
 test.each(['987.654.321-00', '974.563.215-58', '714.287.938-60'])(
   'Deve testar se o cpf %s é válido',

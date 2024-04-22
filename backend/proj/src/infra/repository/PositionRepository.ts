@@ -1,13 +1,13 @@
 import { Account } from '../../domain/entity/Account'
 import { DatabaseConnection } from '../database/DatabaseConnection'
 
-export interface AccountRepository {
+export interface PositionRepository {
   save(account: Account): Promise<void>
   getByEmail(email: string): Promise<Account | undefined>
   getById(accountId: string): Promise<Account | undefined>
 }
 
-export class AccountRepositoryDatabase implements AccountRepository {
+export class PositionRepositoryDatabase implements PositionRepository {
   constructor(readonly connection: DatabaseConnection) {}
 
   async save(account: Account) {
@@ -64,7 +64,7 @@ export class AccountRepositoryDatabase implements AccountRepository {
   }
 }
 
-export class AccountRepositoryMemory implements AccountRepository {
+export class PositionRepositoryMemory implements PositionRepository {
   accounts: any[]
   constructor() {
     this.accounts = []
