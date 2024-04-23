@@ -1,15 +1,20 @@
+import { Position } from '../../domain/entity/Position'
+import { PositionRepository } from '../../infra/repository/PositionRepository'
 import { RideRepository } from '../../infra/repository/RideRepository'
 
 export class UpdatePosition {
-  constructor(private rideRepository: RideRepository) {}
+  constructor(
+    private rideRepository: RideRepository,
+    private positionRepository: PositionRepository,
+  ) {}
 
   async execute(input: Input): Promise<void> {
     const ride = await this.rideRepository.get(input.rideId)
     if (!ride) throw new Error('Ride not found')
     ride.updatePosition(input.lat, input.long)
     await this.rideRepository.update(ride)
-    // const position = new Position(input.rideId, input.lat, input.long)
-    // await this.positionRepository.save(position)
+    const position = Position.create(input.rideId, input.lat, input.long)
+    await this.positionRepository.save(position)
   }
 }
 

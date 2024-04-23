@@ -17,13 +17,17 @@ import {
   AccountRepositoryDatabase,
 } from '../../src/infra/repository/AccountRepository'
 import {
+  PositionRepository,
+  PositionRepositoryDatabase,
+} from '../../src/infra/repository/PositionRepository'
+import {
   RideRepository,
   RideRepositoryDatabase,
 } from '../../src/infra/repository/RideRepository'
 
 let rideRepository: RideRepository
 let accountRepository: AccountRepository
-// let positionRepository: PositionRepository
+let positionRepository: PositionRepository
 let connection: DatabaseConnection
 let mailerGateway: MailerGateway
 let requestRide: RequestRide
@@ -38,13 +42,13 @@ beforeAll(() => {
   mailerGateway = new MailerGatewayConsole()
   rideRepository = new RideRepositoryDatabase(connection)
   accountRepository = new AccountRepositoryDatabase(connection)
-  // positionRepository = new PositionRepositoryDatabase(connection)
+  positionRepository = new PositionRepositoryDatabase(connection)
   requestRide = new RequestRide(rideRepository, accountRepository)
   signup = new Signup(accountRepository, mailerGateway)
   getRide = new GetRide(rideRepository, accountRepository)
   acceptRide = new AcceptRide(rideRepository, accountRepository)
   startRide = new StartRide(rideRepository)
-  updatePosition = new UpdatePosition(rideRepository)
+  updatePosition = new UpdatePosition(rideRepository, positionRepository)
 })
 
 afterAll(async () => {
