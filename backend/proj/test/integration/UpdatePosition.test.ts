@@ -1,4 +1,5 @@
 import { AcceptRide } from '../../src/application/usecase/AcceptRide'
+import { GetPositions } from '../../src/application/usecase/GetPositions'
 import { GetRide } from '../../src/application/usecase/GetRide'
 import { RequestRide } from '../../src/application/usecase/RequestRide'
 import { Signup } from '../../src/application/usecase/Signup'
@@ -36,6 +37,7 @@ let getRide: GetRide
 let acceptRide: AcceptRide
 let startRide: StartRide
 let updatePosition: UpdatePosition
+let getPositions: GetPositions
 
 beforeAll(() => {
   connection = new MysqlAdapter()
@@ -49,6 +51,7 @@ beforeAll(() => {
   acceptRide = new AcceptRide(rideRepository, accountRepository)
   startRide = new StartRide(rideRepository)
   updatePosition = new UpdatePosition(rideRepository, positionRepository)
+  getPositions = new GetPositions(positionRepository)
 })
 
 afterAll(async () => {
@@ -98,4 +101,12 @@ test('Deve atualizar a posição', async () => {
   expect(outputGetRide.distance).toBe(10)
   expect(outputGetRide.lastPositionLat).toBe(inputUpdatePosition.lat)
   expect(outputGetRide.lastPositionLong).toBe(inputUpdatePosition.long)
+  const outputGetPositions = await getPositions.execute(
+    outputRequestRide.rideId,
+  )
+  expect(outputGetPositions.length).toBe(1)
+  const [position] = outputGetPositions
+  expect(position.lat).toBe(inputUpdatePosition.lat)
+  expect(position.long).toBe(inputUpdatePosition.long)
+  expect(position.rideId).toBe(outputRequestRide.rideId)
 })
