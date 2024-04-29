@@ -1,3 +1,4 @@
+import { Account } from '../../domain/entity/Account'
 import { Model, column, model } from './ORM'
 
 @model('branas-15', 'account')
@@ -29,8 +30,8 @@ export class AccountModel extends Model {
     email: string,
     cpf: string,
     carPlate: string,
-    isPassenger: boolean,
-    isDriver: boolean,
+    isPassenger: boolean = false,
+    isDriver: boolean = false,
   ) {
     super()
     this.accountId = accountId
@@ -40,5 +41,29 @@ export class AccountModel extends Model {
     this.carPlate = carPlate
     this.isPassenger = isPassenger
     this.isDriver = isDriver
+  }
+
+  static fromAggregate(account: Account): AccountModel {
+    return new AccountModel(
+      account.accountId,
+      account.getName(),
+      account.getEmail(),
+      account.getCpf(),
+      account.getCarPlate() ?? '',
+      account.isPassenger,
+      account.isDriver,
+    )
+  }
+
+  getAggregate(): Account {
+    return Account.restore(
+      this.accountId,
+      this.name,
+      this.email,
+      this.cpf,
+      this.isPassenger,
+      this.isDriver,
+      this.carPlate,
+    )
   }
 }

@@ -5,6 +5,7 @@ import { MailerGateway } from '../../src/infra/gateway/MailerGateway'
 import {
   AccountRepository,
   AccountRepositoryDatabase,
+  AccountRepositoryORM,
 } from '../../src/infra/repository/AccountRepository'
 import {
   DatabaseConnection,
@@ -18,7 +19,7 @@ let mailerGateway: MailerGateway
 let connection: DatabaseConnection
 beforeAll(() => {
   connection = new MysqlAdapter()
-  accountRepository = new AccountRepositoryDatabase(connection)
+  accountRepository = new AccountRepositoryORM(connection)
   mailerGateway = {
     send: async () => {},
   }
@@ -159,7 +160,7 @@ test('Deve criar a conta de um passageiro spy', async () => {
     isPassenger: true,
   }
 
-  const saveSpy = sinon.spy(AccountRepositoryDatabase.prototype, 'save')
+  const saveSpy = sinon.spy(AccountRepositoryORM.prototype, 'save')
   // const mailerSpy = sinon.spy(MailerGateway.prototype, 'send')
   const mailerSpy = sinon.spy(mailerGateway, 'send')
 

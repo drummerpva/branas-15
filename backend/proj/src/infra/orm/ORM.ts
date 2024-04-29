@@ -10,6 +10,17 @@ export class ORM {
     const values = model.columns.map((column: any) => model[column.property])
     await this.connection.query(query, values)
   }
+
+  async findBy(model: any, field: string, value: string) {
+    const query = `SELECT * FROM ${model.prototype.table} WHERE ${field} = ?`
+    const [data] = await this.connection.query(query, [value])
+    // eslint-disable-next-line new-cap
+    const obj = new model()
+    for (const column of model.prototype.columns) {
+      obj[column.property] = data[column.column]
+    }
+    return obj
+  }
 }
 
 export class Model {

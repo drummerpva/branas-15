@@ -1,5 +1,7 @@
 import { Account } from '../../domain/entity/Account'
 import { DatabaseConnection } from '../database/DatabaseConnection'
+import { AccountModel } from '../orm/AccountModel'
+import { ORM } from '../orm/ORM'
 
 export interface AccountRepository {
   save(account: Account): Promise<void>
@@ -51,6 +53,52 @@ export class AccountRepositoryDatabase implements AccountRepository {
       [accountId],
     )) as any[]
 
+    if (!account) return
+    return Account.restore(
+      account.account_id,
+      account.name,
+      account.email,
+      account.cpf,
+      account.is_passenger,
+      account.is_driver,
+      account.car_plate,
+    )
+  }
+}
+export class AccountRepositoryORM implements AccountRepository {
+  orm: ORM
+  constructor(readonly connection: DatabaseConnection) {
+    this.orm = new ORM(connection)
+  }
+
+  async save(account: Account) {
+    const accountModel = AccountModel.fromAggregate(account)
+    await this.orm.save(accountModel)
+  }
+
+  async getByEmail(email: string) {
+    const [account] = (await this.connection.query(
+      `SELECT * FROM account WHERE email = ?`,
+      [email],
+    )) as any[]
+
+    if (!account) return
+    return Account.restore(
+      account.account_id,
+      account.name,
+      account.email,
+      account.cpf,
+      account.is_passenger,
+      account.is_driver,
+      account.car_plate,
+    )
+  }
+
+  async getById(accountId: string) {
+    const [account] = await this.connection.query(
+      'select * from account where account_id = ?',
+      [accountId],
+    )
     if (!account) return
     return Account.restore(
       account.account_id,
