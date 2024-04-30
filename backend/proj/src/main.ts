@@ -8,6 +8,7 @@ import { RideRepositoryDatabase } from './infra/repository/RideRepository'
 import { MysqlAdapter } from './infra/database/DatabaseConnection'
 import { MainController } from './infra/http/MainController'
 import { ExpressAdapter } from './infra/http/HttpServer'
+import { Registry } from './infra/di/Registry'
 
 const connection = new MysqlAdapter()
 const accountRepository = new AccountRepositoryDatabase(connection)
@@ -18,5 +19,13 @@ const getAccount = new GetAccount(accountRepository)
 const requestRide = new RequestRide(rideRepository, accountRepository)
 const getRide = new GetRide(rideRepository, accountRepository)
 const httpServer = new ExpressAdapter()
-new MainController(httpServer, signup, getAccount, requestRide, getRide)
+
+const registry = Registry.getInstance()
+registry.register('signup', signup)
+registry.register('getAccount', getAccount)
+registry.register('requestRide', requestRide)
+registry.register('getRide', getRide)
+registry.register('httpServer', httpServer)
+
+new MainController()
 httpServer.listen(3000)
