@@ -1,22 +1,15 @@
+import { AccountGateway } from '../../src/application/gateway/AccountGateway'
 import { AcceptRide } from '../../src/application/usecase/AcceptRide'
 import { GetPositions } from '../../src/application/usecase/GetPositions'
 import { GetRide } from '../../src/application/usecase/GetRide'
 import { RequestRide } from '../../src/application/usecase/RequestRide'
-import { Signup } from '../../src/application/usecase/Signup'
 import { StartRide } from '../../src/application/usecase/StartRide'
 import { UpdatePosition } from '../../src/application/usecase/UpdatePosition'
 import {
   DatabaseConnection,
   MysqlAdapter,
 } from '../../src/infra/database/DatabaseConnection'
-import {
-  MailerGateway,
-  MailerGatewayConsole,
-} from '../../src/infra/gateway/MailerGateway'
-import {
-  AccountRepository,
-  AccountRepositoryDatabase,
-} from '../../src/infra/repository/AccountRepository'
+import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
 import {
   PositionRepository,
   PositionRepositoryDatabase,
@@ -27,12 +20,10 @@ import {
 } from '../../src/infra/repository/RideRepository'
 
 let rideRepository: RideRepository
-let accountRepository: AccountRepository
+let accountGateway: AccountGateway
 let positionRepository: PositionRepository
 let connection: DatabaseConnection
-let mailerGateway: MailerGateway
 let requestRide: RequestRide
-let signup: Signup
 let getRide: GetRide
 let acceptRide: AcceptRide
 let startRide: StartRide
@@ -41,14 +32,12 @@ let getPositions: GetPositions
 
 beforeAll(() => {
   connection = new MysqlAdapter()
-  mailerGateway = new MailerGatewayConsole()
   rideRepository = new RideRepositoryDatabase(connection)
-  accountRepository = new AccountRepositoryDatabase(connection)
+  accountGateway = new AccountGatewayHttp()
   positionRepository = new PositionRepositoryDatabase(connection)
-  requestRide = new RequestRide(rideRepository, accountRepository)
-  signup = new Signup(accountRepository, mailerGateway)
-  getRide = new GetRide(rideRepository, accountRepository)
-  acceptRide = new AcceptRide(rideRepository, accountRepository)
+  requestRide = new RequestRide(rideRepository, accountGateway)
+  getRide = new GetRide(rideRepository, accountGateway)
+  acceptRide = new AcceptRide(rideRepository, accountGateway)
   startRide = new StartRide(rideRepository)
   updatePosition = new UpdatePosition(rideRepository, positionRepository)
   getPositions = new GetPositions(positionRepository)
@@ -65,7 +54,8 @@ test('Deve atualizar a posição', async () => {
     cpf: '987.654.321-00',
     isPassenger: true,
   }
-  const outputSignupPassenger = await signup.execute(inputSignupPassenger)
+  const outputSignupPassenger =
+    await accountGateway.signup(inputSignupPassenger)
   const inputRequestRide = {
     passengerId: outputSignupPassenger.accountId,
     fromLat: -27.584905257808835,
@@ -81,7 +71,7 @@ test('Deve atualizar a posição', async () => {
     isDriver: true,
     carPlate: 'ABC1234',
   }
-  const outputSignupDriver = await signup.execute(inputSignupDriver)
+  const outputSignupDriver = await accountGateway.signup(inputSignupDriver)
   const inputAcceptRide = {
     rideId: outputRequestRide.rideId,
     driverId: outputSignupDriver.accountId,
