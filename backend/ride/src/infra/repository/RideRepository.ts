@@ -34,13 +34,14 @@ export class RideRepositoryDatabase implements RideRepository {
 
   async update(ride: Ride) {
     await this.connection.query(
-      `UPDATE ride SET status = ?, driver_id = ?, last_lat = ?, last_long = ?, distance = ? WHERE ride_id = ?`,
+      `UPDATE ride SET status = ?, driver_id = ?, last_lat = ?, last_long = ?, distance = ?, fare = ? WHERE ride_id = ?`,
       [
         ride.getStatus(),
         ride.getDriverId(),
         ride.getLastLat(),
         ride.getLastLong(),
         ride.getDistance(),
+        ride.getFare(),
         ride.rideId,
       ],
     )
@@ -64,6 +65,7 @@ export class RideRepositoryDatabase implements RideRepository {
       Number(rideData.last_lat),
       Number(rideData.last_long),
       Number(rideData.distance),
+      Number(rideData.fare),
       rideData.driver_id,
     )
   }
@@ -88,6 +90,7 @@ export class RideRepositoryDatabase implements RideRepository {
       Number(activeRideData.last_lat),
       Number(activeRideData.last_long),
       Number(activeRideData.distance),
+      Number(activeRideData.fare),
       activeRideData.driver_id,
     )
   }

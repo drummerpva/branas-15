@@ -19,6 +19,7 @@ export class Ride {
     lastLat: number,
     lastLong: number,
     private distance: number,
+    private fare: number,
     private driverId?: string,
   ) {
     this.from = new Coord(fromLat, fromLong)
@@ -48,6 +49,7 @@ export class Ride {
       fromLat,
       fromLong,
       0,
+      0,
     )
   }
 
@@ -63,6 +65,7 @@ export class Ride {
     lastLat: number,
     lastLong: number,
     distance: number,
+    fare: number,
     driverId?: string,
   ) {
     return new Ride(
@@ -77,6 +80,7 @@ export class Ride {
       lastLat,
       lastLong,
       distance,
+      fare,
       driverId,
     )
   }
@@ -101,6 +105,12 @@ export class Ride {
       newLastPosition,
     )
     this.lastPosition = newLastPosition
+  }
+
+  finish() {
+    if (this.status !== 'in_progress') throw new Error('Invalid status')
+    this.status = 'completed'
+    this.fare = this.distance * 2.1
   }
 
   getStatus() {
@@ -137,5 +147,9 @@ export class Ride {
 
   getDistance() {
     return this.distance
+  }
+
+  getFare() {
+    return this.fare
   }
 }

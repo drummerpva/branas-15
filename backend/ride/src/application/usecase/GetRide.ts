@@ -26,6 +26,7 @@ export class GetRide {
       lastPositionLat: ride.getLastLat(),
       lastPositionLong: ride.getLastLong(),
       distance: ride.getDistance(),
+      fare: ride.getFare(),
     }
   }
 }
@@ -43,5 +44,6 @@ type Output = {
   lastPositionLat: number
   lastPositionLong: number
   distance: number
+  fare: number
   date: Date
 }
