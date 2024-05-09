@@ -1,6 +1,7 @@
 import crypto from 'node:crypto'
 import { Coord } from '../vo/Coord'
 import { DistanceCalculator } from '../ds/DIstanceCalculator'
+import { FareCalculatorFactory } from '../ds/FareCalculator'
 
 export class Ride {
   private from: Coord
@@ -110,7 +111,7 @@ export class Ride {
   finish() {
     if (this.status !== 'in_progress') throw new Error('Invalid status')
     this.status = 'completed'
-    this.fare = this.distance * 2.1
+    this.fare = FareCalculatorFactory.create(this.date).calulate(this.distance)
   }
 
   getStatus() {

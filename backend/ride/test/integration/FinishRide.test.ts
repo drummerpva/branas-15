@@ -18,6 +18,7 @@ import {
   RideRepository,
   RideRepositoryDatabase,
 } from '../../src/infra/repository/RideRepository'
+import sinon from 'sinon'
 
 let rideRepository: RideRepository
 let accountGateway: AccountGateway
@@ -47,7 +48,8 @@ afterAll(async () => {
   await connection.close()
 })
 
-test('Deve finalizar uma corrida', async () => {
+test('Deve finalizar uma corrida em horário normal', async () => {
+  sinon.useFakeTimers(new Date('2024-02-26T13:00:00'))
   const inputSignupPassenger = {
     name: 'John Doe',
     email: `john.doe${Math.random()}@mail.com`,
@@ -94,4 +96,55 @@ test('Deve finalizar uma corrida', async () => {
   const outputGetRide = await getRide.execute(outputRequestRide.rideId)
   expect(outputGetRide.fare).toBe(21)
   expect(outputGetRide.status).toBe('completed')
+  sinon.restore()
+})
+test('Deve finalizar uma corrida em horário adicional noturno', async () => {
+  sinon.useFakeTimers(new Date('2024-02-26T23:00:00'))
+  const inputSignupPassenger = {
+    name: 'John Doe',
+    email: `john.doe${Math.random()}@mail.com`,
+    cpf: '987.654.321-00',
+    isPassenger: true,
+  }
+  const outputSignupPassenger =
+    await accountGateway.signup(inputSignupPassenger)
+  const inputRequestRide = {
+    passengerId: outputSignupPassenger.accountId,
+    fromLat: -27.584905257808835,
+    fromLong: -48.545022195325124,
+    toLat: -27.496887588317275,
+    toLong: -48.522234807851476,
+  }
+  const outputRequestRide = await requestRide.execute(inputRequestRide)
+  const inputSignupDriver = {
+    name: 'John Doe',
+    email: `john.doe${Math.random()}@mail.com`,
+    cpf: '987.654.321-00',
+    isDriver: true,
+    carPlate: 'ABC1234',
+  }
+  const outputSignupDriver = await accountGateway.signup(inputSignupDriver)
+  const inputAcceptRide = {
+    rideId: outputRequestRide.rideId,
+    driverId: outputSignupDriver.accountId,
+  }
+  await acceptRide.execute(inputAcceptRide)
+  const inputStartRide = {
+    rideId: outputRequestRide.rideId,
+  }
+  await startRide.execute(inputStartRide)
+  const inputUpdatePosition = {
+    rideId: outputRequestRide.rideId,
+    lat: -27.496887588317275,
+    long: -48.522234807851476,
+  }
+  await updatePosition.execute(inputUpdatePosition)
+  const inputFinishRide = {
+    rideId: outputRequestRide.rideId,
+  }
+  await finishRide.execute(inputFinishRide)
+  const outputGetRide = await getRide.execute(outputRequestRide.rideId)
+  expect(outputGetRide.fare).toBe(39)
+  expect(outputGetRide.status).toBe('completed')
+  sinon.restore()
 })
