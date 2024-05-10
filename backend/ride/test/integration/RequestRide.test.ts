@@ -6,6 +6,7 @@ import {
   MysqlAdapter,
 } from '../../src/infra/database/DatabaseConnection'
 import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
+import { AxiosAdapter } from '../../src/infra/http/HttpClient'
 import {
   RideRepository,
   RideRepositoryDatabase,
@@ -19,7 +20,8 @@ let getRide: GetRide
 
 beforeAll(() => {
   connection = new MysqlAdapter()
-  accountGateway = new AccountGatewayHttp()
+  const httpClient = new AxiosAdapter()
+  accountGateway = new AccountGatewayHttp(httpClient)
   rideRepository = new RideRepositoryDatabase(connection)
   requestRide = new RequestRide(rideRepository, accountGateway)
   getRide = new GetRide(rideRepository, accountGateway)

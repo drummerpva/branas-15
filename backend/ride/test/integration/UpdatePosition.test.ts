@@ -10,6 +10,7 @@ import {
   MysqlAdapter,
 } from '../../src/infra/database/DatabaseConnection'
 import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
+import { AxiosAdapter } from '../../src/infra/http/HttpClient'
 import {
   PositionRepository,
   PositionRepositoryDatabase,
@@ -33,7 +34,8 @@ let getPositions: GetPositions
 beforeAll(() => {
   connection = new MysqlAdapter()
   rideRepository = new RideRepositoryDatabase(connection)
-  accountGateway = new AccountGatewayHttp()
+  const httpClient = new AxiosAdapter()
+  accountGateway = new AccountGatewayHttp(httpClient)
   positionRepository = new PositionRepositoryDatabase(connection)
   requestRide = new RequestRide(rideRepository, accountGateway)
   getRide = new GetRide(rideRepository, accountGateway)

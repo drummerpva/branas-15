@@ -10,6 +10,7 @@ import {
   MysqlAdapter,
 } from '../../src/infra/database/DatabaseConnection'
 import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
+import { FetchAdapter } from '../../src/infra/http/HttpClient'
 import {
   PositionRepository,
   PositionRepositoryDatabase,
@@ -34,7 +35,8 @@ let finishRide: FinishRide
 beforeAll(() => {
   connection = new MysqlAdapter()
   rideRepository = new RideRepositoryDatabase(connection)
-  accountGateway = new AccountGatewayHttp()
+  const httpClient = new FetchAdapter()
+  accountGateway = new AccountGatewayHttp(httpClient)
   positionRepository = new PositionRepositoryDatabase(connection)
   requestRide = new RequestRide(rideRepository, accountGateway)
   getRide = new GetRide(rideRepository, accountGateway)

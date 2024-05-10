@@ -6,10 +6,12 @@ import { MainController } from './infra/http/MainController'
 import { ExpressAdapter } from './infra/http/HttpServer'
 import { Registry } from './infra/di/Registry'
 import { AccountGatewayHttp } from './infra/gateway/AccountGatewayHttp'
+import { AxiosAdapter } from './infra/http/HttpClient'
 
 const connection = new MysqlAdapter()
 const rideRepository = new RideRepositoryDatabase(connection)
-const accountGateway = new AccountGatewayHttp()
+const httpClient = new AxiosAdapter()
+const accountGateway = new AccountGatewayHttp(httpClient)
 const requestRide = new RequestRide(rideRepository, accountGateway)
 const getRide = new GetRide(rideRepository, accountGateway)
 const httpServer = new ExpressAdapter()
