@@ -2,6 +2,7 @@ import { AccountGateway } from '../../src/application/gateway/AccountGateway'
 import { AcceptRide } from '../../src/application/usecase/AcceptRide'
 import { FinishRide } from '../../src/application/usecase/FinishRide'
 import { GetRide } from '../../src/application/usecase/GetRide'
+import { ProcessPayment } from '../../src/application/usecase/ProcessPayment'
 import { RequestRide } from '../../src/application/usecase/RequestRide'
 import { StartRide } from '../../src/application/usecase/StartRide'
 import { UpdatePosition } from '../../src/application/usecase/UpdatePosition'
@@ -11,6 +12,8 @@ import {
 } from '../../src/infra/database/DatabaseConnection'
 import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
 import { FetchAdapter } from '../../src/infra/http/HttpClient'
+import { Mediator } from '../../src/infra/mediator/Mediator'
+import { Queue, RabbitMQAdapter } from '../../src/infra/queue/Queue'
 import {
   PositionRepository,
   PositionRepositoryDatabase,
@@ -31,8 +34,10 @@ let acceptRide: AcceptRide
 let startRide: StartRide
 let updatePosition: UpdatePosition
 let finishRide: FinishRide
+let processPayment: ProcessPayment
+let queue: Queue
 
-beforeAll(() => {
+beforeAll(async () => {
   connection = new MysqlAdapter()
   rideRepository = new RideRepositoryDatabase(connection)
   const httpClient = new FetchAdapter()
@@ -43,7 +48,14 @@ beforeAll(() => {
   acceptRide = new AcceptRide(rideRepository, accountGateway)
   startRide = new StartRide(rideRepository)
   updatePosition = new UpdatePosition(rideRepository, positionRepository)
-  finishRide = new FinishRide(rideRepository)
+  processPayment = new ProcessPayment(rideRepository)
+  const mediator = new Mediator()
+  mediator.register('rideCompleted', async (input: any) => {
+    await processPayment.execute(input.rideId)
+  })
+  queue = new RabbitMQAdapter()
+  await queue.connect()
+  finishRide = new FinishRide(rideRepository, mediator, queue)
 })
 
 afterAll(async () => {
