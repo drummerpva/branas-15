@@ -2,8 +2,10 @@ import crypto from 'node:crypto'
 import { Coord } from '../vo/Coord'
 import { DistanceCalculator } from '../ds/DIstanceCalculator'
 import { FareCalculatorFactory } from '../ds/FareCalculator'
+import { RideCompletedEvent } from '../event/RideCompletedEvent'
+import { Aggregate } from './Aggregate'
 
-export class Ride {
+export class Ride extends Aggregate {
   private from: Coord
   private to: Coord
   private lastPosition: Coord
@@ -23,6 +25,7 @@ export class Ride {
     private fare: number,
     private driverId?: string,
   ) {
+    super()
     this.from = new Coord(fromLat, fromLong)
     this.to = new Coord(toLat, toLong)
     this.lastPosition = new Coord(lastLat, lastLong)
@@ -108,10 +111,11 @@ export class Ride {
     this.lastPosition = newLastPosition
   }
 
-  finish() {
+  async finish() {
     if (this.status !== 'in_progress') throw new Error('Invalid status')
     this.status = 'completed'
     this.fare = FareCalculatorFactory.create(this.date).calulate(this.distance)
+    await this.notify(new RideCompletedEvent(this.rideId, '123456', this.fare))
   }
 
   getStatus() {
