@@ -1,4 +1,5 @@
 import { AccountGateway } from '../../src/application/gateway/AccountGateway'
+import { GetRideQuery } from '../../src/application/query/GetRideQuery'
 import { AcceptRide } from '../../src/application/usecase/AcceptRide'
 import { GetRide } from '../../src/application/usecase/GetRide'
 import { RequestRide } from '../../src/application/usecase/RequestRide'
@@ -21,6 +22,7 @@ let requestRide: RequestRide
 let getRide: GetRide
 let acceptRide: AcceptRide
 let startRide: StartRide
+let getRideQuery: GetRideQuery
 
 beforeAll(() => {
   connection = new MysqlAdapter()
@@ -31,6 +33,7 @@ beforeAll(() => {
   getRide = new GetRide(rideRepository, accountGateway)
   acceptRide = new AcceptRide(rideRepository, accountGateway)
   startRide = new StartRide(rideRepository)
+  getRideQuery = new GetRideQuery(connection)
 })
 
 afterAll(async () => {
@@ -73,4 +76,8 @@ test('Deve Iniciar uma corrida', async () => {
   await startRide.execute(inputStartRide)
   const outputGetRide = await getRide.execute(outputRequestRide.rideId)
   expect(outputGetRide.status).toBe('in_progress')
+  const outputGetRideQuery = await getRideQuery.execute(
+    outputRequestRide.rideId,
+  )
+  expect(outputGetRideQuery.status).toBe('in_progress')
 })

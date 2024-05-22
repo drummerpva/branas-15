@@ -1,4 +1,5 @@
 import { DomainEvent } from '../../domain/event/DomainEvent'
+import { RideCompletedEvent } from '../../domain/event/RideCompletedEvent'
 import { Mediator } from '../../infra/mediator/Mediator'
 import { Queue } from '../../infra/queue/Queue'
 import { RideRepository } from '../../infra/repository/RideRepository'
@@ -13,11 +14,11 @@ export class FinishRide {
   async execute(input: Input): Promise<void> {
     const ride = await this.rideRepository.get(input.rideId)
     if (!ride) throw new Error('Ride not found')
-    ride.register('rideCompleted', async (event: DomainEvent) => {
-      await this.queue.publish(event.name, event)
+    ride.register(RideCompletedEvent.eventName, async (event: DomainEvent) => {
+      await this.rideRepository.update(ride)
+      await this.queue.publish(event.eventName, event)
     })
     await ride.finish()
-    await this.rideRepository.update(ride)
     // await this.mediator.notify('rideCompleted', { rideId: ride.rideId })
     // await this.queue.publish(event.name, event)
   }

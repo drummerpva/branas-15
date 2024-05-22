@@ -12,6 +12,10 @@ export class GetRide {
     if (!ride) throw new Error('Ride does not exist')
     const passenger = await this.accountGateway.getById(ride.passengerId)
     if (!passenger) throw new Error('Passenger not found')
+    let driver: any
+    if (ride.getDriverId()) {
+      driver = await this.accountGateway.getById(String(ride.getDriverId()))
+    }
     return {
       passengerId: ride.passengerId,
       passengerName: passenger.name,
@@ -27,6 +31,7 @@ export class GetRide {
       lastPositionLong: ride.getLastLong(),
       distance: ride.getDistance(),
       fare: ride.getFare(),
+      driverName: driver?.name,
     }
   }
 }
@@ -35,6 +40,7 @@ type Output = {
   passengerId: string
   passengerName: string
   driverId?: string
+  driverName?: string
   rideId: string
   fromLat: number
   fromLong: number

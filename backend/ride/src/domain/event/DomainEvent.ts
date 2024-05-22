@@ -1,3 +1,3 @@
 export interface DomainEvent {
-  name: string
+  eventName: string
 }
