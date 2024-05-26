@@ -1,6 +1,9 @@
+import { LogDecorator } from '../../src/application/decorator/LogDecorator'
+import { SecurityDecorator } from '../../src/application/decorator/SecurityDecorator'
 import { AccountGateway } from '../../src/application/gateway/AccountGateway'
 import { GetRide } from '../../src/application/usecase/GetRide'
 import { RequestRide } from '../../src/application/usecase/RequestRide'
+import { UseCase } from '../../src/application/usecase/UseCase'
 import {
   DatabaseConnection,
   MysqlAdapter,
@@ -15,7 +18,7 @@ import {
 let rideRepository: RideRepository
 let accountGateway: AccountGateway
 let connection: DatabaseConnection
-let requestRide: RequestRide
+let requestRide: UseCase
 let getRide: GetRide
 
 beforeAll(() => {
@@ -23,7 +26,9 @@ beforeAll(() => {
   const httpClient = new AxiosAdapter()
   accountGateway = new AccountGatewayHttp(httpClient)
   rideRepository = new RideRepositoryDatabase(connection)
-  requestRide = new RequestRide(rideRepository, accountGateway)
+  requestRide = new SecurityDecorator(
+    new LogDecorator(new RequestRide(rideRepository, accountGateway)),
+  )
   getRide = new GetRide(rideRepository, accountGateway)
 })
 

@@ -1,13 +1,15 @@
 import { Ride } from '../../domain/entity/Ride'
 import { RideRepository } from '../../infra/repository/RideRepository'
 import { AccountGateway } from '../gateway/AccountGateway'
-export class RequestRide {
+import { UseCase } from './UseCase'
+export class RequestRide implements UseCase {
   constructor(
     readonly rideRepository: RideRepository,
     readonly accountGateway: AccountGateway,
   ) {}
 
   async execute(input: Input): Promise<Output> {
+    console.log(input)
     const account = await this.accountGateway.getById(input.passengerId)
     if (!account) throw new Error('Account does not exist')
     if (!account?.isPassenger) {

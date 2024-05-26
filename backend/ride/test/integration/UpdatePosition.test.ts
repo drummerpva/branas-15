@@ -11,6 +11,7 @@ import {
 } from '../../src/infra/database/DatabaseConnection'
 import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
 import { AxiosAdapter } from '../../src/infra/http/HttpClient'
+import { Queue, RabbitMQAdapter } from '../../src/infra/queue/Queue'
 import {
   PositionRepository,
   PositionRepositoryDatabase,
@@ -30,8 +31,9 @@ let acceptRide: AcceptRide
 let startRide: StartRide
 let updatePosition: UpdatePosition
 let getPositions: GetPositions
+let queue: Queue
 
-beforeAll(() => {
+beforeAll(async () => {
   connection = new MysqlAdapter()
   rideRepository = new RideRepositoryDatabase(connection)
   const httpClient = new AxiosAdapter()
@@ -40,7 +42,9 @@ beforeAll(() => {
   requestRide = new RequestRide(rideRepository, accountGateway)
   getRide = new GetRide(rideRepository, accountGateway)
   acceptRide = new AcceptRide(rideRepository, accountGateway)
-  startRide = new StartRide(rideRepository)
+  queue = new RabbitMQAdapter()
+  await queue.connect()
+  startRide = new StartRide(rideRepository, queue)
   updatePosition = new UpdatePosition(rideRepository, positionRepository)
   getPositions = new GetPositions(positionRepository)
 })

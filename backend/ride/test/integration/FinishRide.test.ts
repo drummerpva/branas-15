@@ -46,7 +46,6 @@ beforeAll(async () => {
   requestRide = new RequestRide(rideRepository, accountGateway)
   getRide = new GetRide(rideRepository, accountGateway)
   acceptRide = new AcceptRide(rideRepository, accountGateway)
-  startRide = new StartRide(rideRepository)
   updatePosition = new UpdatePosition(rideRepository, positionRepository)
   processPayment = new ProcessPayment(rideRepository)
   const mediator = new Mediator()
@@ -55,6 +54,7 @@ beforeAll(async () => {
   })
   queue = new RabbitMQAdapter()
   await queue.connect()
+  startRide = new StartRide(rideRepository, queue)
   finishRide = new FinishRide(rideRepository, mediator, queue)
 })
 

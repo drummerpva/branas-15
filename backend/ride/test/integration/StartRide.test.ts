@@ -1,4 +1,6 @@
 import { AccountGateway } from '../../src/application/gateway/AccountGateway'
+import { UpdateRideProjectionHandler } from '../../src/application/handler/UpdateRideProjectionHandler'
+import { GetRideProjectionQuery } from '../../src/application/query/GetRideProjectionQuery'
 import { GetRideQuery } from '../../src/application/query/GetRideQuery'
 import { AcceptRide } from '../../src/application/usecase/AcceptRide'
 import { GetRide } from '../../src/application/usecase/GetRide'
@@ -10,10 +12,12 @@ import {
 } from '../../src/infra/database/DatabaseConnection'
 import { AccountGatewayHttp } from '../../src/infra/gateway/AccountGatewayHttp'
 import { AxiosAdapter } from '../../src/infra/http/HttpClient'
+import { Queue, RabbitMQAdapter } from '../../src/infra/queue/Queue'
 import {
   RideRepository,
   RideRepositoryDatabase,
 } from '../../src/infra/repository/RideRepository'
+import { setTimeout as sleep } from 'node:timers/promises'
 
 let rideRepository: RideRepository
 let accountGateway: AccountGateway
@@ -23,8 +27,11 @@ let getRide: GetRide
 let acceptRide: AcceptRide
 let startRide: StartRide
 let getRideQuery: GetRideQuery
+let updateRideProjectionHandler: UpdateRideProjectionHandler
+let getRideProjectionQuery: GetRideProjectionQuery
+let queue: Queue
 
-beforeAll(() => {
+beforeAll(async () => {
   connection = new MysqlAdapter()
   rideRepository = new RideRepositoryDatabase(connection)
   const httpClient = new AxiosAdapter()
@@ -32,8 +39,12 @@ beforeAll(() => {
   requestRide = new RequestRide(rideRepository, accountGateway)
   getRide = new GetRide(rideRepository, accountGateway)
   acceptRide = new AcceptRide(rideRepository, accountGateway)
-  startRide = new StartRide(rideRepository)
+  queue = new RabbitMQAdapter()
+  await queue.connect()
+  startRide = new StartRide(rideRepository, queue)
   getRideQuery = new GetRideQuery(connection)
+  updateRideProjectionHandler = new UpdateRideProjectionHandler(connection)
+  getRideProjectionQuery = new GetRideProjectionQuery(connection)
 })
 
 afterAll(async () => {
@@ -74,10 +85,17 @@ test('Deve Iniciar uma corrida', async () => {
     rideId: outputRequestRide.rideId,
   }
   await startRide.execute(inputStartRide)
-  const outputGetRide = await getRide.execute(outputRequestRide.rideId)
-  expect(outputGetRide.status).toBe('in_progress')
-  const outputGetRideQuery = await getRideQuery.execute(
+  // const outputGetRide = await getRide.execute(outputRequestRide.rideId)
+  // expect(outputGetRide.status).toBe('in_progress')
+  // const outputGetRideQuery = await getRideQuery.execute(
+  //   outputRequestRide.rideId,
+  // )
+  // expect(outputGetRideQuery.status).toBe('in_progress')
+  // await updateRideProjectionHandler.execute(outputRequestRide.rideId)
+  await sleep(100)
+  const outputGetRideProjectionQuery = await getRideProjectionQuery.execute(
     outputRequestRide.rideId,
   )
-  expect(outputGetRideQuery.status).toBe('in_progress')
+  expect(outputGetRideProjectionQuery.status).toBe('in_progress')
+  console.log(outputGetRideProjectionQuery)
 })

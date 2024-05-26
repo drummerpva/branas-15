@@ -12,6 +12,7 @@ import { QueueController } from './infra/queue/QueueController'
 import { RabbitMQAdapter } from './infra/queue/Queue'
 import { FinishRide } from './application/usecase/FinishRide'
 import { Mediator } from './infra/mediator/Mediator'
+import { UpdateRideProjectionHandler } from './application/handler/UpdateRideProjectionHandler'
 
 async function main() {
   const connection = new MysqlAdapter()
@@ -22,6 +23,7 @@ async function main() {
   const getRide = new GetRide(rideRepository, accountGateway)
   const httpServer = new ExpressAdapter()
   const processPayment = new ProcessPayment(rideRepository)
+  const updateRideProjection = new UpdateRideProjectionHandler(connection)
   const mediator = new Mediator()
   mediator.register('rideCompleted', async (input: any) => {
     await processPayment.execute(input.rideId)
@@ -33,6 +35,7 @@ async function main() {
   registry.register('requestRide', requestRide)
   registry.register('getRide', getRide)
   registry.register('processPayment', processPayment)
+  registry.register('updateRideProjection', updateRideProjection)
   registry.register('finishRide', finishRide)
   registry.register('httpServer', httpServer)
   registry.register('queue', queue)
