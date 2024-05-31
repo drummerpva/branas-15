@@ -8,9 +8,22 @@ test('Deve criar uma conta de um passageiro por meio do wizard', async () => {
   expect(container.querySelector('.progress')).toHaveTextContent('0 %')
   await userEvent.click(container.querySelector('.input-is-passenger')!)
   expect(container.querySelector('.input-is-passenger')).toBeChecked()
+  expect(container.querySelector('.input-name')).toBeFalsy()
+  expect(container.querySelector('.input-email')).toBeFalsy()
+  expect(container.querySelector('.input-cpf')).toBeFalsy()
   expect(container.querySelector('.progress')).toHaveTextContent('25 %')
   await userEvent.click(container.querySelector('.button-next')!)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 2')
+  expect(container.querySelector('.input-is-passenger')).toBeFalsy()
+  await userEvent.type(container.querySelector('.input-name')!, 'John Doe')
+  expect(container.querySelector('.progress')).toHaveTextContent('40 %')
+  await userEvent.type(
+    container.querySelector('.input-email')!,
+    `john.doe${Math.random()}@gmail.com`,
+  )
+  expect(container.querySelector('.progress')).toHaveTextContent('55 %')
+  await userEvent.type(container.querySelector('.input-cpf')!, `98765432100`)
+  expect(container.querySelector('.progress')).toHaveTextContent('70 %')
 })
 test('Deve mostar uma mensagem de erro ao tentar ir para o passo 2 caso nenhum tipo de conta seja selecionado', async () => {
   const { container } = render(<App />)
