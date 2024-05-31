@@ -16,7 +16,18 @@ export function App() {
       if (oldForm.step === 1 && !oldForm.isPassenger && !oldForm.isDriver) {
         return { ...oldForm, error: 'Selecione um tipo de conta' }
       }
-      return { ...oldForm, step: oldForm.step + 1 }
+      if (oldForm.step === 2) {
+        if (!oldForm.name) {
+          return { ...oldForm, error: 'Digite o nome' }
+        }
+        if (!oldForm.email) {
+          return { ...oldForm, error: 'Digite o email' }
+        }
+        if (!oldForm.cpf) {
+          return { ...oldForm, error: 'Digite o CPF' }
+        }
+      }
+      return { ...oldForm, step: oldForm.step + 1, error: '' }
     })
   }, [])
 
