@@ -5,31 +5,45 @@ import { App } from '../src/App'
 test('Deve criar uma conta de um passageiro por meio do wizard', async () => {
   const { container } = render(<App />)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 1')
-  expect(container.querySelector('.progress')).toHaveTextContent('0 %')
+  expect(container.querySelector('.progress')).toHaveTextContent('0%')
   await userEvent.click(container.querySelector('.input-is-passenger')!)
   expect(container.querySelector('.input-is-passenger')).toBeChecked()
   expect(container.querySelector('.input-name')).toBeFalsy()
   expect(container.querySelector('.input-email')).toBeFalsy()
   expect(container.querySelector('.input-cpf')).toBeFalsy()
-  expect(container.querySelector('.progress')).toHaveTextContent('25 %')
+  expect(container.querySelector('.progress')).toHaveTextContent('25%')
   await userEvent.click(container.querySelector('.button-next')!)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 2')
-  expect(container.querySelector('.input-is-passenger')).toBeFalsy()
   await userEvent.type(container.querySelector('.input-name')!, 'John Doe')
-  expect(container.querySelector('.progress')).toHaveTextContent('40 %')
+  expect(container.querySelector('.progress')).toHaveTextContent('40%')
   await userEvent.type(
     container.querySelector('.input-email')!,
     `john.doe${Math.random()}@gmail.com`,
   )
-  expect(container.querySelector('.progress')).toHaveTextContent('55 %')
+  expect(container.querySelector('.progress')).toHaveTextContent('55%')
   await userEvent.type(container.querySelector('.input-cpf')!, `98765432100`)
-  expect(container.querySelector('.progress')).toHaveTextContent('70 %')
+  expect(container.querySelector('.progress')).toHaveTextContent('70%')
+  expect(container.querySelector('.input-is-passenger')).toBeFalsy()
+  await userEvent.click(container.querySelector('.button-next')!)
+  expect(container.querySelector('.step')).toHaveTextContent('Passo 3')
+  expect(container.querySelector('.input-is-passenger')).toBeFalsy()
+  expect(container.querySelector('.input-name')).toBeFalsy()
+  expect(container.querySelector('.input-email')).toBeFalsy()
+  expect(container.querySelector('.input-cpf')).toBeFalsy()
+  await userEvent.type(container.querySelector('.input-password')!, '12345678')
+  expect(container.querySelector('.progress')).toHaveTextContent('85%')
+  await userEvent.type(
+    container.querySelector('.input-confirm-password')!,
+    '12345678',
+  )
+  expect(container.querySelector('.progress')).toHaveTextContent('100%')
+  expect(container.querySelector('.button-next')).toBeFalsy()
 })
 
 test('Deve mostar uma mensagem de erro ao tentar ir para o passo 2 caso nenhum tipo de conta seja selecionado', async () => {
   const { container } = render(<App />)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 1')
-  expect(container.querySelector('.progress')).toHaveTextContent('0 %')
+  expect(container.querySelector('.progress')).toHaveTextContent('0%')
   await userEvent.click(container.querySelector('.button-next')!)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 1')
   expect(container.querySelector('.error')).toHaveTextContent(
@@ -59,4 +73,41 @@ test('Deve mostrar uma mensagem de erro ao tentar ir para o passo 3 caso nome, e
   await userEvent.click(container.querySelector('.button-next')!)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 3')
   expect(container.querySelector('.error')).toBeFalsy()
+})
+
+test('Deve mostrar uma mensagem de erro ao tentar submeter sem senha', async () => {
+  const { container } = render(<App />)
+  await userEvent.click(container.querySelector('.input-is-passenger')!)
+  await userEvent.click(container.querySelector('.button-next')!)
+  await userEvent.type(container.querySelector('.input-name')!, 'John Doe')
+  await userEvent.type(
+    container.querySelector('.input-email')!,
+    `john.doe${Math.random()}@gmail.com`,
+  )
+  await userEvent.type(container.querySelector('.input-cpf')!, `98765432100`)
+  await userEvent.click(container.querySelector('.button-next')!)
+  expect(container.querySelector('.step')).toHaveTextContent('Passo 3')
+  await userEvent.click(container.querySelector('.button-submit')!)
+  expect(container.querySelector('.error')).toHaveTextContent(
+    'A senha deve ser preenchida',
+  )
+})
+test('Deve mostrar uma mensagem de erro ao tentar submeter sem que a senha esteja igual', async () => {
+  const { container } = render(<App />)
+  await userEvent.click(container.querySelector('.input-is-passenger')!)
+  await userEvent.click(container.querySelector('.button-next')!)
+  await userEvent.type(container.querySelector('.input-name')!, 'John Doe')
+  await userEvent.type(
+    container.querySelector('.input-email')!,
+    `john.doe${Math.random()}@gmail.com`,
+  )
+  await userEvent.type(container.querySelector('.input-cpf')!, `98765432100`)
+  await userEvent.click(container.querySelector('.button-next')!)
+  expect(container.querySelector('.step')).toHaveTextContent('Passo 3')
+  await userEvent.type(container.querySelector('.input-password')!, '12345678')
+  await userEvent.type(container.querySelector('.input-confirm-password')!, '1')
+  await userEvent.click(container.querySelector('.button-submit')!)
+  expect(container.querySelector('.error')).toHaveTextContent(
+    'A senha e a confirmação de senha precisam ser iguais',
+  )
 })

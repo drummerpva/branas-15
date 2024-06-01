@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useMemo, useState } from 'react'
 
 export function App() {
   const [signupForm, setSignupForm] = useState({
@@ -7,11 +7,14 @@ export function App() {
     name: '',
     email: '',
     cpf: '',
+    password: '',
+    confirmPassword: '',
     step: 1,
     error: '',
   })
 
-  const nextStep = useCallback(() => {
+  const nextStep = useCallback((e: FormEvent) => {
+    e.preventDefault()
     setSignupForm((oldForm) => {
       if (oldForm.step === 1 && !oldForm.isPassenger && !oldForm.isDriver) {
         return { ...oldForm, error: 'Selecione um tipo de conta' }
@@ -25,6 +28,17 @@ export function App() {
         }
         if (!oldForm.cpf) {
           return { ...oldForm, error: 'Digite o CPF' }
+        }
+      }
+      if (oldForm.step === 3) {
+        if (!oldForm.password) {
+          return { ...oldForm, error: 'A senha deve ser preenchida' }
+        }
+        if (oldForm.password !== oldForm.confirmPassword) {
+          return {
+            ...oldForm,
+            error: 'A senha e a confirmação de senha precisam ser iguais',
+          }
         }
       }
       return { ...oldForm, step: oldForm.step + 1, error: '' }
@@ -45,13 +59,25 @@ export function App() {
     if (signupForm.cpf) {
       progress += 15
     }
+    if (signupForm.password) {
+      progress += 15
+    }
+    if (signupForm.confirmPassword) {
+      progress += 15
+    }
     return progress
   }, [signupForm])
+
+  const showNext = useMemo(
+    () => signupForm.step === 1 || signupForm.step === 2,
+    [signupForm.step],
+  )
+  const showSubmit = useMemo(() => signupForm.step === 3, [signupForm.step])
 
   return (
     <>
       <h1 className="step">Passo {signupForm.step}</h1>
-      <span className="progress">{formProgress} %</span>
+      <span className="progress">{formProgress}%</span>
       <br />
       {!!signupForm.error && <span className="error">{signupForm.error}</span>}
       {signupForm.step === 1 && (
@@ -74,6 +100,7 @@ export function App() {
           <input
             type="text"
             className="input-name"
+            placeholder="Nome"
             onChange={({ target: { value } }) =>
               setSignupForm((old) => ({ ...old, name: value }))
             }
@@ -82,6 +109,7 @@ export function App() {
           <input
             type="text"
             className="input-email"
+            placeholder="Email"
             onChange={({ target: { value } }) =>
               setSignupForm((old) => ({ ...old, email: value }))
             }
@@ -89,6 +117,7 @@ export function App() {
           <br />
           <input
             type="text"
+            placeholder="CPF"
             className="input-cpf"
             onChange={({ target: { value } }) =>
               setSignupForm((old) => ({ ...old, cpf: value }))
@@ -97,10 +126,36 @@ export function App() {
           <br />
         </div>
       )}
-
-      <button className="button-next" onClick={nextStep}>
-        Próximo
-      </button>
+      {signupForm.step === 3 && (
+        <div>
+          <input
+            type="password"
+            placeholder="Senha"
+            className="input-password"
+            onChange={({ target: { value } }) =>
+              setSignupForm((old) => ({ ...old, password: value }))
+            }
+          />
+          <input
+            type="password"
+            placeholder="Confirme a senha"
+            className="input-confirm-password"
+            onChange={({ target: { value } }) =>
+              setSignupForm((old) => ({ ...old, confirmPassword: value }))
+            }
+          />
+        </div>
+      )}
+      {showNext && (
+        <button className="button-next" onClick={nextStep}>
+          Próximo
+        </button>
+      )}
+      {showSubmit && (
+        <button className="button-submit" onClick={nextStep}>
+          Enviar
+        </button>
+      )}
     </>
   )
 }
