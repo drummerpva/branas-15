@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { App } from '../src/App'
 
@@ -38,6 +38,13 @@ test('Deve criar uma conta de um passageiro por meio do wizard', async () => {
   )
   expect(container.querySelector('.progress')).toHaveTextContent('100%')
   expect(container.querySelector('.button-next')).toBeFalsy()
+  await userEvent.click(container.querySelector('.button-submit')!)
+  const element = await screen.findByText((_content, element) => {
+    if (!element) return false
+    return element.classList.contains('success')
+  })
+  expect(element).toBeInTheDocument()
+  expect(element).toHaveTextContent('Conta criada com sucesso')
 })
 
 test('Deve mostar uma mensagem de erro ao tentar ir para o passo 2 caso nenhum tipo de conta seja selecionado', async () => {

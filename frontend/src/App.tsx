@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
 
 export function App() {
@@ -11,39 +12,60 @@ export function App() {
     confirmPassword: '',
     step: 1,
     error: '',
+    success: '',
   })
 
-  const nextStep = useCallback((e: FormEvent) => {
-    e.preventDefault()
-    setSignupForm((oldForm) => {
-      if (oldForm.step === 1 && !oldForm.isPassenger && !oldForm.isDriver) {
-        return { ...oldForm, error: 'Selecione um tipo de conta' }
-      }
-      if (oldForm.step === 2) {
-        if (!oldForm.name) {
-          return { ...oldForm, error: 'Digite o nome' }
+  const handleSubmit = useCallback(async (formData: any) => {
+    const input = {
+      name: formData.name,
+      email: formData.email,
+      cpf: formData.cpf,
+      isPassenger: formData.isPassenger,
+    }
+    const response = await axios.post('http://localhost:3001/signup', input)
+    const output = response.data
+    setSignupForm((oldForm) => ({
+      ...oldForm,
+      success: 'Conta criada com sucesso',
+    }))
+  }, [])
+
+  const nextStep = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault()
+      setSignupForm((oldForm) => {
+        if (oldForm.step === 1 && !oldForm.isPassenger && !oldForm.isDriver) {
+          return { ...oldForm, error: 'Selecione um tipo de conta' }
         }
-        if (!oldForm.email) {
-          return { ...oldForm, error: 'Digite o email' }
-        }
-        if (!oldForm.cpf) {
-          return { ...oldForm, error: 'Digite o CPF' }
-        }
-      }
-      if (oldForm.step === 3) {
-        if (!oldForm.password) {
-          return { ...oldForm, error: 'A senha deve ser preenchida' }
-        }
-        if (oldForm.password !== oldForm.confirmPassword) {
-          return {
-            ...oldForm,
-            error: 'A senha e a confirmação de senha precisam ser iguais',
+        if (oldForm.step === 2) {
+          if (!oldForm.name) {
+            return { ...oldForm, error: 'Digite o nome' }
+          }
+          if (!oldForm.email) {
+            return { ...oldForm, error: 'Digite o email' }
+          }
+          if (!oldForm.cpf) {
+            return { ...oldForm, error: 'Digite o CPF' }
           }
         }
-      }
-      return { ...oldForm, step: oldForm.step + 1, error: '' }
-    })
-  }, [])
+        if (oldForm.step === 3) {
+          if (!oldForm.password) {
+            return { ...oldForm, error: 'A senha deve ser preenchida' }
+          }
+          if (oldForm.password !== oldForm.confirmPassword) {
+            return {
+              ...oldForm,
+              error: 'A senha e a confirmação de senha precisam ser iguais',
+            }
+          }
+          handleSubmit(oldForm)
+          return oldForm
+        }
+        return { ...oldForm, step: oldForm.step + 1, error: '' }
+      })
+    },
+    [handleSubmit],
+  )
 
   const formProgress = useMemo(() => {
     let progress = 0
@@ -80,6 +102,9 @@ export function App() {
       <span className="progress">{formProgress}%</span>
       <br />
       {!!signupForm.error && <span className="error">{signupForm.error}</span>}
+      {!!signupForm.success && (
+        <span className="success">{signupForm.success}</span>
+      )}
       {signupForm.step === 1 && (
         <>
           <label htmlFor="input-as-passenger">Passageiro</label>
