@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { Cpf } from './Cpf'
 
 export function App() {
   const [signupForm, setSignupForm] = useState({
@@ -44,6 +45,11 @@ export function App() {
           if (!oldForm.email) {
             return { ...oldForm, error: 'Digite o email' }
           }
+          // try {
+          //   new Cpf(oldForm.cpf)
+          // } catch (error: any) {
+          //   return { ...oldForm, error: error.message }
+          // }
           if (!oldForm.cpf) {
             return { ...oldForm, error: 'Digite o CPF' }
           }
@@ -66,6 +72,23 @@ export function App() {
     },
     [handleSubmit],
   )
+  const previousStep = useCallback(() => {
+    setSignupForm((oldForm) => {
+      if (oldForm.step === 1) return oldForm
+      return { ...oldForm, step: oldForm.step - 1 }
+    })
+  }, [])
+
+  const handleTypeMock = useCallback(() => {
+    setSignupForm((oldForm) => ({
+      ...oldForm,
+      name: 'John Doe',
+      email: `john.doe${Math.random()}@gmail.com`,
+      cpf: '98765432100',
+      password: '12345678',
+      confirmPassword: '12345678',
+    }))
+  }, [])
 
   const formProgress = useMemo(() => {
     let progress = 0
@@ -90,15 +113,15 @@ export function App() {
     return progress
   }, [signupForm])
 
-  const showNext = useMemo(
-    () => signupForm.step === 1 || signupForm.step === 2,
-    [signupForm.step],
-  )
-  const showSubmit = useMemo(() => signupForm.step === 3, [signupForm.step])
+  const showNext = signupForm.step === 1 || signupForm.step === 2
+  const showPrevious = signupForm.step > 1
+  const showSubmit = signupForm.step === 3
 
   return (
     <>
-      <h1 className="step">Passo {signupForm.step}</h1>
+      <h1 className="step" onClick={handleTypeMock}>
+        Passo {signupForm.step}
+      </h1>
       <span className="progress">{formProgress}%</span>
       <br />
       {!!signupForm.error && <span className="error">{signupForm.error}</span>}
@@ -170,6 +193,11 @@ export function App() {
             }
           />
         </div>
+      )}
+      {showPrevious && (
+        <button className="button-previous" onClick={previousStep}>
+          Anterior
+        </button>
       )}
       {showNext && (
         <button className="button-next" onClick={nextStep}>

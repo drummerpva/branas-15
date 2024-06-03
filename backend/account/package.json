@@ -22,8 +22,8 @@
     "eslint": "^8",
     "eslint-plugin-simple-import-sort": "^12.1.0",
     "sinon": "^17.0.2",
-    "tsup": "^8.0.2",
-    "tsx": "^4.9.3",
+    "tsup": "^8.1.0",
+    "tsx": "^4.11.2",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
