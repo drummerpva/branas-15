@@ -3,5 +3,6 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
     'no-new': 'off',
+    'no-useless-constructor': 'off',
   },
 }

@@ -1,8 +1,11 @@
-import axios from 'axios'
 import { FormEvent, useCallback, useMemo, useState } from 'react'
-import { Cpf } from './Cpf'
+import { AccountGateway } from './infra/gateway/AccountGateway'
 
-export function App() {
+type AppProps = {
+  accountGateway: AccountGateway
+}
+
+export function App({ accountGateway }: AppProps) {
   const [signupForm, setSignupForm] = useState({
     isPassenger: false,
     isDriver: false,
@@ -14,22 +17,26 @@ export function App() {
     step: 1,
     error: '',
     success: '',
+    accoundId: '',
   })
 
-  const handleSubmit = useCallback(async (formData: any) => {
-    const input = {
-      name: formData.name,
-      email: formData.email,
-      cpf: formData.cpf,
-      isPassenger: formData.isPassenger,
-    }
-    const response = await axios.post('http://localhost:3001/signup', input)
-    const output = response.data
-    setSignupForm((oldForm) => ({
-      ...oldForm,
-      success: 'Conta criada com sucesso',
-    }))
-  }, [])
+  const handleSubmit = useCallback(
+    async (formData: any) => {
+      const input = {
+        name: formData.name,
+        email: formData.email,
+        cpf: formData.cpf,
+        isPassenger: formData.isPassenger,
+      }
+      const output = await accountGateway.signup(input)
+      setSignupForm((oldForm) => ({
+        ...oldForm,
+        success: 'Conta criada com sucesso',
+        accoundId: output.accountId,
+      }))
+    },
+    [accountGateway],
+  )
 
   const nextStep = useCallback(
     (e: FormEvent) => {

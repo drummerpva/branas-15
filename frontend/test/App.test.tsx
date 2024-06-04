@@ -1,9 +1,19 @@
 import { render, screen } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { App } from '../src/App'
+import { AccountGateway } from '../src/infra/gateway/AccountGateway'
+
+let accountGateway: AccountGateway
+beforeAll(() => {
+  accountGateway = {
+    signup: vi.fn().mockResolvedValue({
+      accountId: '123',
+    }),
+  }
+})
 
 test('Deve criar uma conta de um passageiro por meio do wizard', async () => {
-  const { container } = render(<App />)
+  const { container } = render(<App accountGateway={accountGateway} />)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 1')
   expect(container.querySelector('.progress')).toHaveTextContent('0%')
   await userEvent.click(container.querySelector('.input-is-passenger')!)
@@ -57,7 +67,7 @@ test('Deve criar uma conta de um passageiro por meio do wizard', async () => {
 })
 
 test('Deve mostar uma mensagem de erro ao tentar ir para o passo 2 caso nenhum tipo de conta seja selecionado', async () => {
-  const { container } = render(<App />)
+  const { container } = render(<App accountGateway={accountGateway} />)
   expect(container.querySelector('.step')).toHaveTextContent('Passo 1')
   expect(container.querySelector('.progress')).toHaveTextContent('0%')
   await userEvent.click(container.querySelector('.button-next')!)
@@ -68,7 +78,7 @@ test('Deve mostar uma mensagem de erro ao tentar ir para o passo 2 caso nenhum t
 })
 
 test('Deve mostrar uma mensagem de erro ao tentar ir para o passo 3 caso nome, email e cpf não sejão informados', async () => {
-  const { container } = render(<App />)
+  const { container } = render(<App accountGateway={accountGateway} />)
   await userEvent.click(container.querySelector('.input-is-passenger')!)
   await userEvent.click(container.querySelector('.button-next')!)
   await userEvent.click(container.querySelector('.button-next')!)
@@ -92,7 +102,7 @@ test('Deve mostrar uma mensagem de erro ao tentar ir para o passo 3 caso nome, e
 })
 
 test('Deve mostrar uma mensagem de erro ao tentar submeter sem senha', async () => {
-  const { container } = render(<App />)
+  const { container } = render(<App accountGateway={accountGateway} />)
   await userEvent.click(container.querySelector('.input-is-passenger')!)
   await userEvent.click(container.querySelector('.button-next')!)
   await userEvent.type(container.querySelector('.input-name')!, 'John Doe')
@@ -109,7 +119,7 @@ test('Deve mostrar uma mensagem de erro ao tentar submeter sem senha', async () 
   )
 })
 test('Deve mostrar uma mensagem de erro ao tentar submeter sem que a senha esteja igual', async () => {
-  const { container } = render(<App />)
+  const { container } = render(<App accountGateway={accountGateway} />)
   await userEvent.click(container.querySelector('.input-is-passenger')!)
   await userEvent.click(container.querySelector('.button-next')!)
   await userEvent.type(container.querySelector('.input-name')!, 'John Doe')
